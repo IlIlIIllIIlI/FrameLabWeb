@@ -1,2 +1,2 @@
-# slam_project1
+# FrameLabBackend
 Le projet 1 en SLAM (web)
