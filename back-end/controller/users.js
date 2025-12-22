@@ -7,12 +7,22 @@ export async function getAllUsers(req, res) {
   res.json({ success: true, users });
 }
 
+export async function checkPasswordByEmail(email, password) {
+  try {
+    return await bcrypt.compare(password, userModel.getPasswordByEmail(email))
+  } catch (error) {
+    return false
+  }
+
+}
+
 export async function login(req, res) {
-  if (bcrypt.compare(req.body.password, userModel.getPasswordByEmail(req.body.email))) {
+  email = req.body.email
+  if (checkPasswordByEmail(email)) {
 
-    const userData = userModel.getUserByEmail()
+    const userData = userModel.getUserByEmail(email)
 
-    const token = jwt.sign({ "user_id": userData["id"] }, process.env.PRIVATE_KEY, { algorithm: 'RS256' }, { expiresIn: "1 year" })
+    const token = jwt.sign({ "user": userData }, process.env.PRIVATE_KEY, { algorithm: 'RS256' }, { expiresIn: "1 year" })
 
     res.cookie("session", token, { expires: new Date(Date.now() + 31556952000) })
 
@@ -33,7 +43,7 @@ export async function register(req, res) {
   const regpass = /^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,}$/
   const email = req.body.email
   const password = req.body.password
-  if (!regmail.test(email)) {
+  if (email == null || !regmail.test(email)) {
     res.json({
       "success": false,
       "message": "Invalid Email",
@@ -41,17 +51,17 @@ export async function register(req, res) {
     })
   }
 
-  if (!regpass.test(password)) {
+  if (password == null || !regpass.test(password)) {
     res.json({
       "success": false,
       "message": "Invalid password(minimum 8 characters,one uppercase English letter,one lowercase English letter,one digit and one special character) ",
       "error": 401
     })
   }
-  if (userModel.createUser(email, req.body.mail, req.body.first_name, req.body.last_name, bcrypt.hash(req.body.password))) {
-    const userData = userModel.getUserByEmail()
+  if (userModel.createUser(email, req.body.first_name, req.body.last_name, bcrypt.hash(req.body.password))) {
+    const userData = userModel.getUserByEmail(email)
 
-    const token = jwt.sign({ "user_id": userData["id"] }, process.env.PRIVATE_KEY, { algorithm: 'RS256' }, { expiresIn: "1 year" })
+    const token = jwt.sign({ "user": userData }, process.env.PRIVATE_KEY, { algorithm: 'RS256' }, { expiresIn: "1 year" })
 
     res.cookie("session", token, { expires: new Date(Date.now() + 31556952000) })
 
@@ -65,13 +75,39 @@ export async function register(req, res) {
   }
 }
 
-export async function auth(req, res) {
+export async function auth(req, res, next) {
   session = req.cookie.session
-  if (session == null) {
-    res.json({
-      "success": false,
-      "message": "Session doesn't exist",
-      "error": 401
-    })
+
+  if (session != null) {
+    const data = jwt.verify(session, process.env.PRIVATE_KEY)
+
+    req.user = data.user
+    next()
+
+  }
+
+  bearer = req.get("Authorization").split(" ")[2]
+  if (bearer != null) {
+    const data = jwt.verify(bearer, process.env.PRIVATE_KEY)
+
+    req.user = data.user
+    next()
+
+  }
+
+  email = req.body.email
+  password = req.body.password
+  if (typeof email !== 'undefined' && typeof password !== 'undefined') {
+    if (checkPasswordByEmail(email, password)) {
+      req.user = userModel.getUserByEmail(email)
+      next()
+    }
+  }
+  res.error(401)
+}
+
+export async function isAdmin(req, res) {
+  if (!req.user.is_admin) {
+    res.error(403)
   }
 }

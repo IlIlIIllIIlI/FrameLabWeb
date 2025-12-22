@@ -1,6 +1,6 @@
 import { Router } from "express";
-import { getAllUsers, login } from "./controller/users.js";
-import { getAllChallenges, getCurrentChallenge } from "./controller/challenges.js";
+import { getAllUsers, login, auth, isAdmin } from "./controller/users.js";
+import { getAllChallenges, getCurrentChallenge, createChallenge, upload } from "./controller/challenges.js";
 import { getAllComments, getCommentById, deleteCommentById } from "./controller/comments.js";
 import { getAllVotes } from "./controller/votes.js";
 import { register } from "module";
@@ -17,6 +17,7 @@ const router = Router();
  *         description: successful operation.
  */
 router.route("/users").get((req, res) => {
+  auth(req, res)
   getAllUsers(req, res);
 });
 
@@ -29,9 +30,9 @@ router.route("/users").get((req, res) => {
  *       200:
  *         description: successful operation.
  */
-router.route("/challenges").get((req, res) => {
-  getAllChallenges(req, res);
-});
+router.route("/challenges")
+  .get(auth, getAllChallenges)
+  .post(auth, isAdmin, upload, createChallenge);
 
 /**
  * @openapi
@@ -44,6 +45,7 @@ router.route("/challenges").get((req, res) => {
  */
 
 router.route("/challenges/current").get((req, res) => {
+  auth(req, res)
   getCurrentChallenge(req, res)
 })
 /**
@@ -58,6 +60,8 @@ router.route("/challenges/current").get((req, res) => {
 
 router.route("/comments")
   .get((req, res) => {
+    auth(req, res)
+
     getAllComments(req, res);
   })
 
@@ -94,9 +98,12 @@ router.route("/comments")
 
 router.route("/comments/:id")
   .get((req, res) => {
+    auth(req, res)
     getCommentById(req, res);
   })
   .delete((req, res) => {
+    auth(req, res)
+    isAdmin(req, res)
     deleteCommentById(req, res);
   })
 /**
@@ -111,6 +118,7 @@ router.route("/comments/:id")
 
 
 router.route("/votes").get((req, res) => {
+  auth(req, res)
   getAllVotes(req, res)
 })
 
@@ -125,10 +133,11 @@ router.route("/votes").get((req, res) => {
  */
 
 router.route("/entries").get((req, res) => {
+  auth(req, res)
   getAllEntries(req, res)
 })
 export default router;
 
-router.post("/auth/login", login(req, res));
+router.post("/auth/login", login);
 
-router.post("/auth/register", register(req, res));
+router.post("/auth/register", register);

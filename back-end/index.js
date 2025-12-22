@@ -28,3 +28,4 @@ const swaggerSpec = swaggerJSDoc(options);
 
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 app.listen(8000)
+app.use("/", express.static("public"))

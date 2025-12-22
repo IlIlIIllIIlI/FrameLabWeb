@@ -8,14 +8,46 @@ export async function getAll() {
 
 export async function getCurrent() {
     try {
-        await prisma.challenges.findFirstOrThrow({
+        const res = await prisma.challenges.findFirstOrThrow({
             where: {
                 is_archived: false
             }
         })
 
-        return true
+        return { "success": true, "challenge": res }
     } catch (PrismaClientKnownRequestError) {
-        return false
+        return {
+            "success": false,
+            "message": "No challenge for now"
+        }
+    }
+}
+
+export async function getLatest() {
+    try {
+        const res = await prisma.challenges.findFirstOrThrow({
+            orderBy: {
+                id: 'desc'
+            }
+        })
+
+        return { "success": true, "challenge": res }
+    } catch (PrismaClientKnownRequestError) {
+        return {
+            "success": false,
+            "message": "No challenge"
+        }
+    }
+}
+
+export async function create(title, description, start_date, end_date, picture) {
+    try {
+        const challenge = prisma.challenges.create({
+            data: {
+                title: title
+            }
+        })
+    } catch (error) {
+
     }
 }
