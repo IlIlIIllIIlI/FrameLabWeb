@@ -3,9 +3,9 @@ CREATE TABLE challenges (
   theme_title           VARCHAR(255) NOT NULL,
   theme_description     VARCHAR(255) NOT NULL,
   required_picture_url  VARCHAR(255) NOT NULL,
-  start_date            DATETIME NOT NULL,
+  start_date            DATETIME NOT NULL DEFAULT NOW(),
   end_date              DATETIME NOT NULL,
-  is_archived           BOOLEAN
+  is_archived           BOOLEAN DEFAULT FALSE
 );
 
 CREATE TABLE users (
@@ -15,7 +15,7 @@ CREATE TABLE users (
   last_name        VARCHAR(255) NOT NULL,
   first_name       VARCHAR(255) NOT NULL,
   is_admin         BOOLEAN ,
-  inscription_date DATETIME NOT NULL
+  inscription_date DATETIME NOT NULL DEFAULT NOW()
 );
 
 CREATE TABLE entries (
@@ -23,7 +23,7 @@ CREATE TABLE entries (
   challenge_id       INT REFERENCES challenges(id) ON DELETE CASCADE,
   user_id            INT REFERENCES users(id) ON DELETE CASCADE,
   edited_picture_url VARCHAR(255) NOT NULL,
-  submit_date        DATETIME NOT NULL,
+  submit_date        DATETIME NOT NULL DEFAULT NOW(),
   is_hidden          BOOLEAN
 );
 
@@ -32,17 +32,17 @@ CREATE TABLE comments (
   entry_id          INT REFERENCES entries(id) ON DELETE CASCADE,
   user_id           INT REFERENCES users(id) ON DELETE CASCADE,
   content           VARCHAR(255) NOT NULL,
-  date              DATETIME NOT NULL
+  date              DATETIME NOT NULL DEFAULT NOW()
 );
 
-CREATE TABLE vote (
+CREATE TABLE votes (
   id                   INT PRIMARY KEY AUTO_INCREMENT,
   user_id              INT REFERENCES users(id) ON DELETE CASCADE,
   entry_id             INT REFERENCES entries(id) ON DELETE CASCADE,
   creativity_rating    FLOAT NOT NULL,
   technical_rating     FLOAT NOT NULL,
   theme_respect_rating FLOAT NOT NULL,
-  vote_date            DATETIME,
+  vote_date            DATETIME DEFAULT NOW(),
 
   UNIQUE(user_id, entry_id)
 );
