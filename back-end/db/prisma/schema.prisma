@@ -1,0 +1,77 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../../generated/prisma"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model challenges {
+  id                   Int       @id @default(autoincrement())
+  theme_title          String    @db.VarChar(255)
+  theme_description    String    @db.VarChar(255)
+  required_picture_url String    @db.VarChar(255)
+  start_date           DateTime  @db.DateTime(0)
+  end_date             DateTime  @db.DateTime(0)
+  is_archived          Boolean?
+  entries              entries[]
+}
+
+model entries {
+  id                 Int         @id @default(autoincrement())
+  challenge_id       Int?
+  user_id            Int?
+  edited_picture_url String      @db.VarChar(255)
+  submit_date        DateTime    @db.DateTime(0)
+  is_hidden          Boolean?
+  comments           comments[]
+  challenges         challenges? @relation(fields: [challenge_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "1")
+  users              users?      @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "2")
+  votes              votes[]
+
+  @@index([challenge_id], map: "challenge_id")
+  @@index([user_id], map: "user_id")
+}
+
+model users {
+  id               Int        @id @default(autoincrement())
+  email            String     @unique(map: "email") @db.VarChar(255)
+  password         String     @db.VarChar(255)
+  last_name        String     @db.VarChar(255)
+  first_name       String     @db.VarChar(255)
+  is_admin         Boolean?
+  inscription_date DateTime   @db.DateTime(0)
+  comments         comments[]
+  entries          entries[]
+  votes            votes[]
+}
+
+model votes {
+  id                   Int      @id @default(autoincrement())
+  user_id              Int?
+  entry_id             Int?
+  creativity_rating    Float    @db.Float
+  technical_rating     Float    @db.Float
+  theme_respect_rating Float    @db.Float
+  vote_date            DateTime @db.DateTime(0)
+  users                users?   @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "3")
+  entries              entries? @relation(fields: [entry_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "4")
+
+  @@unique([user_id, entry_id], map: "user_id")
+  @@index([entry_id], map: "entry_id")
+}
+
+model comments {
+  id       Int      @id @default(autoincrement())
+  entry_id Int?
+  user_id  Int?
+  content  String   @db.VarChar(255)
+  date     DateTime @db.DateTime(0)
+  entries  entries? @relation(fields: [entry_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "5")
+  users    users?   @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "6")
+
+  @@index([entry_id], map: "entry_id")
+  @@index([user_id], map: "user_id")
+}
