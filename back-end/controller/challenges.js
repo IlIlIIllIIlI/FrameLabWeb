@@ -1,6 +1,6 @@
 import * as challengeModel from "../model/users.js";
 import multer from "multer";
-import { fs } from "fs";
+import fs from "fs";
 
 
 export async function getAllChallenges(req, res) {
@@ -24,7 +24,7 @@ const storage = multer.diskStorage({
     }
 });
 
-const upload = multer({
+export const upload = multer({
     storage: storage,
     limits: { fileSize: 1000000 },
     fileFilter: function (req, file, cb) {
@@ -48,8 +48,6 @@ export async function createChallenge(req, res) {
         fs.rm(req.file.path)
         res.error(500)
     }
-
-
 }
 
 function checkFileType(file, cb) {

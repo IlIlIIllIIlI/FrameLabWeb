@@ -17,8 +17,10 @@ export async function checkPasswordByEmail(email, password) {
 }
 
 export async function login(req, res) {
-  email = req.body.email
-  if (checkPasswordByEmail(email)) {
+  console.log(req);
+
+  email = req.bodgy.email
+  if (checkPasswordByEmail(email, req.body.password)) {
 
     const userData = userModel.getUserByEmail(email)
 

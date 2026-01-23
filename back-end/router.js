@@ -32,7 +32,7 @@ router.route("/users").get((req, res) => {
  */
 router.route("/challenges")
   .get(auth, getAllChallenges)
-  .post(auth, isAdmin, upload, createChallenge);
+  .post(auth, isAdmin, upload.single, createChallenge);
 
 /**
  * @openapi
@@ -136,8 +136,9 @@ router.route("/entries").get((req, res) => {
   auth(req, res)
   getAllEntries(req, res)
 })
-export default router;
 
 router.post("/auth/login", login);
 
 router.post("/auth/register", register);
+
+export default router;
