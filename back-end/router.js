@@ -1,9 +1,8 @@
 import { Router } from "express";
-import { getAllUsers, login, auth, isAdmin } from "./controller/users.js";
+import { getAllUsers, login, auth, isAdmin,register } from "./controller/users.js";
 import { getAllChallenges, getCurrentChallenge, createChallenge, upload } from "./controller/challenges.js";
 import { getAllComments, getCommentById, deleteCommentById } from "./controller/comments.js";
 import { getAllVotes } from "./controller/votes.js";
-import { register } from "module";
 
 const router = Router();
 

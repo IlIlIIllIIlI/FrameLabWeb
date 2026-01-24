@@ -13,13 +13,13 @@ export async function getPasswordByEmail(email) {
         email: email,
       },
       select: {
-        password: true
-      }
-    })
+        password: true,
+      },
+    });
 
-    return data.password
+    return data.password;
   } catch (PrismaClientKnownRequestError) {
-    return false
+    return null;
   }
 }
 
@@ -29,11 +29,11 @@ export async function getUserByEmail(email) {
       where: {
         email: email,
       },
-    })
+    });
 
-    return data
+    return data;
   } catch (PrismaClientKnownRequestError) {
-    return false
+    return false;
   }
 }
 
@@ -44,12 +44,12 @@ export async function createUser(email, firstName, lastName, password) {
         email: email,
         first_name: firstName,
         last_name: lastName,
-        password: password
+        password: password,
       },
-    })
+    });
 
-    return true
+    return true;
   } catch (error) {
-    return false
+    return false;
   }
 }
