@@ -2,7 +2,7 @@ import { defineStore } from 'pinia'
 
 export const useAuthstore = defineStore('authStore', {
   state: () => ({
-    user: '',
+    user: null,
     error: '',
     isLoading: false,
   }),
@@ -25,7 +25,7 @@ export const useAuthstore = defineStore('authStore', {
       const data = await response.json()
 
       if (data.success) {
-        this.user = data.user.firstName + ' ' + data.user.lastName
+        this.user = data.user
         this.isLoading = false
         this.error = ''
         return true
@@ -53,7 +53,7 @@ export const useAuthstore = defineStore('authStore', {
       const data = await response.json()
 
       if (data.success) {
-        this.user = data.user.firstName + ' ' + data.user.lastName
+        this.user = data.user
         this.isLoading = false
         this.error = ''
         return true
@@ -62,6 +62,20 @@ export const useAuthstore = defineStore('authStore', {
         this.isLoading = false
         return false
       }
+    },
+    async checkUser() {
+      this.error = ''
+      this.isLoading = true
+
+      const response = await fetch('/api/auth/me')
+
+      if (response.ok) {
+        const data = await response.json()
+        this.user = data.user
+      } else {
+        this.user = null
+      }
+      this.isLoading = false
     },
   },
 })

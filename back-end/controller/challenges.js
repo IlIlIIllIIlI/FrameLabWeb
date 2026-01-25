@@ -1,63 +1,102 @@
-import * as challengeModel from "../model/users.js";
-import multer from "multer";
+import * as challengeModel from "../model/challenges.js";
 import fs from "fs";
 
-
-export async function getAllChallenges(req, res) {
-    const challenges = await challengeModel.getAll()
-    res.json(challenges);
+export async function getArchivedChallenges(req, res) {
+  const challenges = await challengeModel.getArchived();
+  res.json(challenges);
 }
-
 
 export async function getCurrentChallenge(req, res) {
-    const challenge = await challengeModel.getCurrent()
+  const challenge = await challengeModel.getCurrent();
 
-    res.header("Authorization", "Bearer <token>")
-    res.json(challenge)
+  return res.json(challenge);
 }
 
-
-
-const storage = multer.diskStorage({
-    filename: function (req, file, cb) {
-        cb(null, file.fieldname);
-    }
-});
-
-export const upload = multer({
-    storage: storage,
-    limits: { fileSize: 1000000 },
-    fileFilter: function (req, file, cb) {
-        checkFileType(file, cb);
-    }
-});
-
-
+export async function getChallengeById(req, res) {
+  const challenge = await challengeModel.getChallenge(parseInt(req.params.id));
+  if (challenge.success) {
+    return res.json(challenge);
+  } else {
+    res.status(404).json(challenge);
+  }
+}
 export async function createChallenge(req, res) {
+  const title = req.body.title;
+  const description = req.body.description;
+  const start_date = req.body.start_date;
+  const end_date = req.body.end_date;
 
-    const currentChallenge = await getCurrent()
+  if (title == null || title.trim().length === 0) {
+    return res.status(401).json({
+      message: "Invalid Title",
+    });
+  }
 
-    if (currentChallenge.success) {
-        res.error();
+  if (description == null || description.trim().length === 0) {
+    return res.status(401).json({
+      message: "Invalid description",
+    });
+  }
+
+  if (start_date == null || start_date.trim().length === 0) {
+    return res.status(401).json({
+      message: "Invalid start date",
+    });
+  }
+
+  if (end_date == null || end_date.trim().length === 0) {
+    return res.status(401).json({
+      message: "Invalid end date",
+    });
+  }
+  const currentChallenge = await challengeModel.getCurrent();
+
+  if (currentChallenge.success) {
+    return res
+      .status(404)
+      .json({ message: "There is already a challenge going on" });
+  }
+  const latestChallenge = await challengeModel.getLatest();
+  const latestId = latestChallenge.success ? latestChallenge.challenge.id : 0;
+  const chall = await challengeModel.create(
+    req.body.title,
+    req.body.description,
+    req.body.start_date,
+    req.body.end_date,
+    `challenges/${latestId + 1}/${req.file.filename}`,
+  );
+
+  if (chall.success) {
+    const newDir = `./public/challenges/${latestId + 1}`;
+
+    if (!fs.existsSync(newDir)) {
+      fs.mkdirSync(newDir, { recursive: true });
     }
-    const latestid = await challengeModel.getLatest().id;
-    const chall = await challengeModel.create(req.body.title, req.body.description, req.body.start_date, req.body.end_date, `challenges/${latestid + 1}/${req.file.filename}`)
-    if (chall.success) {
-        fs.mv(req.file.path, `../public/challenges/${latestid + 1}`)
-    } else {
-        fs.rm(req.file.path)
-        res.error(500)
-    }
+
+    fs.renameSync(req.file.path, `${newDir}/${req.file.filename}`);
+
+    return res.json({ message: "Challenge created successfully!" });
+  } else {
+    fs.unlinkSync(req.file.path);
+    res.status(500).json(chall);
+  }
 }
 
-function checkFileType(file, cb) {
-    const filetypes = /jpeg|jpg|png|gif/;
-    const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
-    const mimetype = filetypes.test(file.mimetype);
-
-    if (mimetype && extname) {
-        return cb(null, true);
-    } else {
-        cb('Error: Images only! (jpeg, jpg, png, gif)');
+export async function archiveChallenge(req, res) {
+  const challengeId = req.body.id;
+  const chall = await challengeModel.getChallenge(challengeId);
+  if (chall.success) {
+    if (chall.data.is_archived) {
+      return res.status(403).json({ message: "Challenge is already archived" });
     }
+    const archive = await challengeModel.archiveChallenge(challengeId);
+
+    if (archive.success) {
+      rees.json(archive);
+    } else {
+      res.status(404).json(archive);
+    }
+  } else {
+    return res.status(404).json({ message: "Challenge does not exist" });
+  }
 }

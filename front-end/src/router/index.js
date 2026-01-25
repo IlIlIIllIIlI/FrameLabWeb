@@ -26,12 +26,19 @@ const router = createRouter({
       component: () => import('../views/RegisterView.vue'),
     },
     {
-      path: '/challenges',
-      name: 'challenges',
-    },
-    {
       path: '/challenges/:id',
       name: 'challenge',
+      component: () => import('../views/ChallengeView.vue'),
+    },
+    {
+      path: '/admin',
+      name: 'Admin',
+      component: () => import('../views/AdminView.vue'),
+    },
+    {
+      path: '/entry/:id',
+      name: 'entry',
+      component: () => import('../views/EntryView.vue'),
     },
   ],
 })

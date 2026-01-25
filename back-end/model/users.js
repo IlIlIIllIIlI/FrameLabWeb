@@ -1,7 +1,11 @@
 import { prisma } from "../db/prisma.ts";
 
 export async function getAll() {
-  const allUsers = await prisma.users.findMany();
+  const allUsers = await prisma.users.findMany({
+    omit: {
+      password: true,
+    },
+  });
 
   return allUsers;
 }
@@ -28,6 +32,9 @@ export async function getUserByEmail(email) {
     const data = await prisma.users.findUniqueOrThrow({
       where: {
         email: email,
+      },
+      omit: {
+        password: true,
       },
     });
 

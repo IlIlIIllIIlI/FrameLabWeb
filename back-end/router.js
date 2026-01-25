@@ -1,8 +1,32 @@
 import { Router } from "express";
-import { getAllUsers, login, auth, isAdmin,register } from "./controller/users.js";
-import { getAllChallenges, getCurrentChallenge, createChallenge, upload } from "./controller/challenges.js";
-import { getAllComments, getCommentById, deleteCommentById } from "./controller/comments.js";
-import { getAllVotes } from "./controller/votes.js";
+import {
+  getAllUsers,
+  login,
+  auth,
+  isAdmin,
+  register,
+  getUserByCookie,
+} from "./controller/users.js";
+import {
+  getArchivedChallenges,
+  getCurrentChallenge,
+  createChallenge,
+  archiveChallenge,
+  getChallengeById,
+} from "./controller/challenges.js";
+import {
+  getAllComments,
+  getCommentById,
+  deleteCommentById,
+  addComment,
+} from "./controller/comments.js";
+import { getAllVotes, castVote } from "./controller/votes.js";
+import {
+  createEntry,
+  getAllEntries,
+  getEntryById,
+} from "./controller/entries.js";
+import { uploadImage } from "./config/mutler.js";
 
 const router = Router();
 
@@ -16,7 +40,7 @@ const router = Router();
  *         description: successful operation.
  */
 router.route("/users").get((req, res) => {
-  auth(req, res)
+  auth(req, res);
   getAllUsers(req, res);
 });
 
@@ -29,10 +53,12 @@ router.route("/users").get((req, res) => {
  *       200:
  *         description: successful operation.
  */
-router.route("/challenges")
-  .get(auth, getAllChallenges)
-  .post(auth, isAdmin, upload.single, createChallenge);
+router
+  .route("/challenges")
+  .get(getArchivedChallenges)
+  .post(auth, isAdmin, uploadImage, createChallenge);
 
+router.route("/challenges/:id").get(getChallengeById);
 /**
  * @openapi
  * /api/challenges/current:
@@ -43,10 +69,10 @@ router.route("/challenges")
  *         description: successful operation.
  */
 
-router.route("/challenges/current").get((req, res) => {
-  auth(req, res)
-  getCurrentChallenge(req, res)
-})
+router
+  .route("/challenge/current")
+  .get(auth, getCurrentChallenge)
+  .put(auth, isAdmin, archiveChallenge);
 /**
  * @openapi
  * /api/comments:
@@ -57,12 +83,7 @@ router.route("/challenges/current").get((req, res) => {
  *         description: successful operation.
  */
 
-router.route("/comments")
-  .get((req, res) => {
-    auth(req, res)
-
-    getAllComments(req, res);
-  })
+router.route("/comments").get(auth, getAllComments).post(auth, addComment);
 
 /**
 * @openapi
@@ -95,16 +116,17 @@ router.route("/comments")
           description: Comment not found.
 */
 
-router.route("/comments/:id")
+router
+  .route("/comments/:id")
   .get((req, res) => {
-    auth(req, res)
+    auth(req, res);
     getCommentById(req, res);
   })
   .delete((req, res) => {
-    auth(req, res)
-    isAdmin(req, res)
+    auth(req, res);
+    isAdmin(req, res);
     deleteCommentById(req, res);
-  })
+  });
 /**
  * @openapi
  * /api/votes:
@@ -115,11 +137,7 @@ router.route("/comments/:id")
  *         description: successful operation.
  */
 
-
-router.route("/votes").get((req, res) => {
-  auth(req, res)
-  getAllVotes(req, res)
-})
+router.route("/votes").get(auth, getAllVotes).post(auth, castVote);
 
 /**
  * @openapi
@@ -131,13 +149,15 @@ router.route("/votes").get((req, res) => {
  *         description: successful operation.
  */
 
-router.route("/entries").get((req, res) => {
-  auth(req, res)
-  getAllEntries(req, res)
-})
+router
+  .route("/entries")
+  .get(auth, getAllEntries)
+  .post(auth, uploadImage, createEntry);
 
+router.route("/entries/:id").get(getEntryById);
 router.post("/auth/login", login);
 
 router.post("/auth/register", register);
 
+router.get("/auth/me", getUserByCookie);
 export default router;

@@ -7,6 +7,20 @@ const title = ref('')
 const startDate = ref('')
 const endDate = ref('')
 const description = ref('')
+const picture = ref('')
+
+function handleFile(event) {
+  picture.value = event.target.files[0]
+}
+function formSubmitted() {
+  emit('submit', {
+    title: title.value,
+    description: description.value,
+    startDate: startDate.value,
+    endDate: endDate.value,
+    picture: picture.value,
+  })
+}
 </script>
 
 <template>
@@ -17,13 +31,12 @@ const description = ref('')
     </label>
     <label>
       Description
-      <input
+      <textarea
         v-model="description"
         name="description"
         placeholder="Description"
-        type="text"
         required
-      />
+      ></textarea>
     </label>
     <label>
       Start Date
@@ -35,7 +48,7 @@ const description = ref('')
     </label>
     <label>
       Picture
-      <input name="picture" type="file" required />
+      <input @change="handleFile" name="picture" type="file" required />
     </label>
     <div>
       <button :disabled="isLoading" class="Button" type="submit">Submit</button>
