@@ -140,5 +140,6 @@ vite.config.ts.timestamp-*
 
 generated/ 
 
-.env
+public/
 
+temp/
