@@ -77,5 +77,25 @@ export const useAuthstore = defineStore('authStore', {
       }
       this.isLoading = false
     },
+    async logout() {
+      this.error = ''
+      this.isLoading = true
+
+      const response = await fetch('/api/auth/logout')
+
+      if (response.ok) {
+        this.user = null
+        this.loading = false
+
+        console.log("oui");
+
+        return true
+      }
+      this.isLoading = false
+
+      console.log("non");
+
+      return false
+    }
   },
 })

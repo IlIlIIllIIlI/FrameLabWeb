@@ -6,6 +6,7 @@ import {
   isAdmin,
   register,
   getUserByCookie,
+  logoutUser
 } from "./controller/users.js";
 import {
   getArchivedChallenges,
@@ -161,3 +162,5 @@ router.post("/auth/register", register);
 
 router.get("/auth/me", getUserByCookie);
 export default router;
+
+router.get("/auth/logout", auth, logoutUser)
