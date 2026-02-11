@@ -167,6 +167,6 @@ export async function getUserByCookie(req, res) {
       return res.status(401).json({ message: "Invalid or expired token" });
     }
   } else {
-    req.status(404).json({ message: "No cookie" });
+    res.status(404).json({ message: "No cookie" });
   }
 }
