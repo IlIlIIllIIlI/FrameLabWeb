@@ -60,3 +60,24 @@ export async function createUser(email, firstName, lastName, password) {
     return false;
   }
 }
+
+
+export async function getIsAdminByEmail(email) {
+  try {
+    const data = await prisma.users.findUniqueOrThrow({
+      where: {
+        email: email,
+      },
+      select: {
+        is_admin: true,
+      },
+    });
+
+    console.log(data);
+    return data;
+
+
+  } catch (PrismaClientKnownRequestError) {
+    return false;
+  }
+}

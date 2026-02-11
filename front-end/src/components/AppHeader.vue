@@ -3,6 +3,14 @@ import { useAuthstore } from '@/stores/authStore'
 import { RouterLink } from 'vue-router'
 
 const authStore = useAuthstore()
+
+async function logout() {
+  const res = await authStore.logout()
+
+  if (res) {
+    location.reload()
+  }
+}
 </script>
 
 <template>
@@ -17,6 +25,7 @@ const authStore = useAuthstore()
           <span> Hello, {{ authStore.user.first_name }} {{ authStore.user.last_name }} ! </span>
 
           <RouterLink v-if="authStore.user.role === 'ADMIN'" to="/admin"> Admin Panel </RouterLink>
+          <button @click="logout">Log out</button>
         </template>
 
         <template v-else>
@@ -28,4 +37,11 @@ const authStore = useAuthstore()
   </header>
 </template>
 
-<style scoped></style>
+<style scoped>
+.app-header {
+  font-size: x-large;
+  position: sticky;
+  z-index: 99;
+  top: 0px;
+}
+</style>

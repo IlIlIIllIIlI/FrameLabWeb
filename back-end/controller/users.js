@@ -148,7 +148,8 @@ export async function auth(req, res, next) {
 }
 
 export async function isAdmin(req, res, next) {
-  if (!req.user.is_admin) {
+  const data = await userModel.getIsAdminByEmail(req.user.email)
+  if (!data.is_admin) {
     return res.status(403).json({
       message: "You need to be an admin to go further",
     });
@@ -169,4 +170,10 @@ export async function getUserByCookie(req, res) {
   } else {
     res.status(404).json({ message: "No cookie" });
   }
+}
+
+
+export async function logoutUser(req, res) {
+  res.clearCookie("session")
+  res.json({ success: true })
 }
