@@ -16,6 +16,13 @@ export async function checkPasswordByEmail(email, password) {
 }
 
 export async function login(req, res) {
+  if (!req.body.email || !req.body.password) {
+    res.status(404).json({
+      success: false,
+      message: "Email and password Can't be empty"
+    });
+  }
+
   const email = req.body.email;
   if (await checkPasswordByEmail(email, req.body.password)) {
     const userData = await userModel.getUserByEmail(email);
@@ -29,10 +36,9 @@ export async function login(req, res) {
 
     res.json({ success: true, token, user: userData });
   } else {
-    res.json({
+    res.status(401).json({
       success: false,
       message: "Incorrect Email or password",
-      error: 401,
     });
   }
 }
@@ -168,7 +174,7 @@ export async function getUserByCookie(req, res) {
       return res.status(401).json({ message: "Invalid or expired token" });
     }
   } else {
-    req.status(404).json({ message: "No cookie" });
+    res.status(404).json({ message: "No cookie" });
   }
 }
 

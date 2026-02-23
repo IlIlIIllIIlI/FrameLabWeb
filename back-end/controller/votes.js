@@ -38,7 +38,7 @@ export async function castVote(req, res) {
   if (creativityRating < 0 || creativityRating > 5) {
     return res
       .status(404)
-      .json({ message: "Ceativity Rating must be between 0 and 5" });
+      .json({ message: "Creativity Rating must be between 0 and 5" });
   }
 
   if (technicalRating < 0 || technicalRating > 5) {
