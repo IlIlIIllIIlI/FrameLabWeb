@@ -17,7 +17,7 @@ export const useAuthstore = defineStore('authStore', {
       })
 
       if (!response.ok) {
-        this.error = 'Sorry something happened, please try later'
+        this.error = await response.json().message
         this.isLoading = false
         return
       }
@@ -29,10 +29,6 @@ export const useAuthstore = defineStore('authStore', {
         this.isLoading = false
         this.error = ''
         return true
-      } else {
-        this.error = data.message
-        this.isLoading = false
-        return false
       }
     },
     async register(credentials) {
@@ -87,13 +83,11 @@ export const useAuthstore = defineStore('authStore', {
         this.user = null
         this.loading = false
 
-        console.log("oui");
 
         return true
       }
       this.isLoading = false
 
-      console.log("non");
 
       return false
     }

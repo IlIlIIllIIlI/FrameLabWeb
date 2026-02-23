@@ -22,8 +22,8 @@ export async function getPasswordByEmail(email) {
     });
 
     return data.password;
-  } catch (PrismaClientKnownRequestError) {
-    return null;
+  } catch (error) {
+    throw error
   }
 }
 

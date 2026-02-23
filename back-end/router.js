@@ -40,10 +40,7 @@ const router = Router();
  *       200:
  *         description: successful operation.
  */
-router.route("/users").get((req, res) => {
-  auth(req, res);
-  getAllUsers(req, res);
-});
+router.route("/users").get(auth, getAllUsers);
 
 /**
  * @openapi
