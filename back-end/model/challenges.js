@@ -1,4 +1,3 @@
-import { exitCode } from "process";
 import { prisma } from "../db/prisma.ts";
 
 export async function getArchived() {

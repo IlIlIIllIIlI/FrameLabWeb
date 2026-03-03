@@ -73,7 +73,6 @@ export async function getIsAdminByEmail(email) {
       },
     });
 
-    console.log(data);
     return data;
 
 

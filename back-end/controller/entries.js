@@ -50,7 +50,6 @@ export async function createEntry(req, res) {
   }
 }
 
-export async function getAllEntries(req, res) {}
 export async function getEntryById(req, res) {
   const entry = await entriesModel.getEntryById(parseInt(req.params.id));
   if (entry.success) {

@@ -12,7 +12,7 @@ export async function getCommentById(req, res) {
 }
 
 export async function deleteCommentById(req, res) {
-  if (commentModel.deleteCommentById()) {
+  if (await commentModel.deleteCommentById(parseInt(req.params.id))) {
     res.json({
       success: true,
       message: "Message deleted successfully",
@@ -31,7 +31,7 @@ export async function addComment(req, res) {
   const userId = req.body.userId;
   const entryId = req.body.entryId;
 
-  if (content.trim() === "") {
+  if (!content || content.trim() === "") {
     return res.status(404).json({ message: "No content" });
   }
 

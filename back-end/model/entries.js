@@ -30,7 +30,7 @@ export async function getEntryByChallengeAndUser(challengeId, userId) {
         message: "No Entry",
       };
     }
-    return { success: true, entry: res };
+    return { success: true, entry: entry };
   } catch (err) {
     return {
       success: false,
