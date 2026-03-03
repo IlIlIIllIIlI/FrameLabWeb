@@ -1,13 +1,16 @@
 import { Router } from "express";
 import {
   getAllUsers,
+} from "./controller/users.js";
+import {
   login,
   auth,
   isAdmin,
   register,
-  getUserByCookie,
-  logoutUser
-} from "./controller/users.js";
+  logoutUser,
+  getUserByCookie
+
+} from "./controller/auth.js";
 import {
   getArchivedChallenges,
   getCurrentChallenge,
@@ -24,7 +27,6 @@ import {
 import { getAllVotes, castVote } from "./controller/votes.js";
 import {
   createEntry,
-  getAllEntries,
   getEntryById,
 } from "./controller/entries.js";
 import { uploadImage } from "./config/mutler.js";
@@ -116,15 +118,15 @@ router.route("/comments").get(auth, getAllComments).post(auth, addComment);
 
 router
   .route("/comments/:id")
-  .get((req, res) => {
-    auth(req, res);
-    getCommentById(req, res);
-  })
-  .delete((req, res) => {
-    auth(req, res);
-    isAdmin(req, res);
-    deleteCommentById(req, res);
-  });
+  .get(
+    auth,
+    getCommentById
+  )
+  .delete(
+    auth,
+    isAdmin,
+    deleteCommentById
+  );
 /**
  * @openapi
  * /api/votes:
@@ -149,7 +151,6 @@ router.route("/votes").get(auth, getAllVotes).post(auth, castVote);
 
 router
   .route("/entries")
-  .get(auth, getAllEntries)
   .post(auth, uploadImage, createEntry);
 
 router.route("/entries/:id").get(getEntryById);
@@ -158,6 +159,6 @@ router.post("/auth/login", login);
 router.post("/auth/register", register);
 
 router.get("/auth/me", getUserByCookie);
-export default router;
 
 router.get("/auth/logout", auth, logoutUser)
+export default router;

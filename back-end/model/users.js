@@ -23,7 +23,7 @@ export async function getPasswordByEmail(email) {
 
     return data.password;
   } catch (error) {
-    throw error
+    throw new Error('User not found')
   }
 }
 
@@ -73,7 +73,6 @@ export async function getIsAdminByEmail(email) {
       },
     });
 
-    console.log(data);
     return data;
 
 
