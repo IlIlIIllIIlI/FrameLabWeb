@@ -86,13 +86,13 @@ export async function archiveChallenge(req, res) {
   const challengeId = req.body.id;
   const chall = await challengeModel.getChallenge(challengeId);
   if (chall.success) {
-    if (chall.challenge.is_archived) {
+    if (chall.data.is_archived) {
       return res.status(403).json({ message: "Challenge is already archived" });
     }
     const archive = await challengeModel.archiveChallenge(challengeId);
 
     if (archive.success) {
-      res.json(archive);
+      rees.json(archive);
     } else {
       res.status(404).json(archive);
     }
