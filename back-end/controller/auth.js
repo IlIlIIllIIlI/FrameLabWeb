@@ -43,35 +43,31 @@ export async function register(req, res) {
     const firstName = req.body.firstName;
 
     if (email == null || !regmail.test(email)) {
-        return res.json({
+        return res.status(401).json({
             success: false,
             message: "Invalid Email",
-            error: 401,
         });
     }
 
     if (password == null || !regpass.test(password)) {
-        return res.json({
+        return res.status(401).json({
             success: false,
             message:
                 "Invalid password (minimum 8 characters, one uppercase English letter, one lowercase English letter, one digit and one special character) ",
-            error: 401,
         });
     }
 
     if (firstName == null || firstName.trim().length === 0) {
-        return res.json({
+        return res.status(401).json({
             success: false,
             message: "First name can't be empty",
-            error: 401,
         });
     }
 
     if (lastName == null || lastName.trim().length === 0) {
-        return res.json({
+        return res.status(401).json({
             success: false,
             message: "Last name can't be empty",
-            error: 401,
         });
     }
 
@@ -90,10 +86,9 @@ export async function register(req, res) {
 
         res.json({ success: true, user: userData });
     } else {
-        res.json({
+        res.status(401).json({
             success: false,
-            message: "Email already exist",
-            error: 401,
+            message: "Email already exist"
         });
     }
 }

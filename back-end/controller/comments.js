@@ -18,10 +18,9 @@ export async function deleteCommentById(req, res) {
       message: "Message deleted successfully",
     });
   } else {
-    res.json({
+    res.status(402).json({
       success: false,
       message: "Comment not found",
-      error: 402,
     });
   }
 }
