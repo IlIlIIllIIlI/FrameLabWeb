@@ -1,17 +1,19 @@
 import { prisma } from "../db/prisma.ts";
 
 export async function getArchived() {
-  const allComments = await prisma.challenges.findMany({
+  const allChallenges = await prisma.challenges.findMany({
     where: {
       is_archived: true,
     },
   });
 
-  return allComments;
+  return allChallenges;
 }
+
 
 export async function getCurrent() {
   try {
+    // findFirstOrThrow will automatically throw an error if no active challenge is found
     const res = await prisma.challenges.findFirstOrThrow({
       where: {
         is_archived: false,
@@ -19,7 +21,7 @@ export async function getCurrent() {
     });
 
     return { success: true, challenge: res };
-  } catch (PrismaClientKnownRequestError) {
+  } catch (error) {
     return {
       success: false,
       message: "No challenge for now",
@@ -27,8 +29,10 @@ export async function getCurrent() {
   }
 }
 
+
 export async function getLatest() {
   try {
+    // Order by ID descending to grab the newest record
     const res = await prisma.challenges.findFirstOrThrow({
       orderBy: {
         id: "desc",
@@ -36,13 +40,14 @@ export async function getLatest() {
     });
 
     return { success: true, challenge: res };
-  } catch (PrismaClientKnownRequestError) {
+  } catch (error) {
     return {
       success: false,
       message: "No challenge",
     };
   }
 }
+
 
 export async function create(
   title,
@@ -56,6 +61,7 @@ export async function create(
       data: {
         theme_title: title,
         theme_description: description,
+        // Prisma requires actual Date objects for DateTime fields
         start_date: new Date(start_date),
         end_date: new Date(end_date),
         required_picture_url: picture,
@@ -84,16 +90,19 @@ export async function archiveChallenge(id) {
   }
 }
 
+
 export async function getChallenge(id) {
   try {
     const data = await prisma.challenges.findUniqueOrThrow({
       where: {
         id: id,
       },
+      // Include User with the challenge
       include: {
         entries: {
           include: {
             users: {
+              // Only pull the first and last name of the user for security/privacy
               select: { first_name: true, last_name: true },
             },
           },
@@ -102,7 +111,7 @@ export async function getChallenge(id) {
     });
 
     return { success: true, challenge: data };
-  } catch (PrismaClientKnownRequestError) {
+  } catch (error) {
     return { success: false, message: "Challenge does not exist" };
   }
-}
+} 

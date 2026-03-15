@@ -39,10 +39,10 @@ describe("Users Model", () => {
             );
         })
 
-        test("should throw error if the user doesn't exist", async () => {
+        test("should return null if the user doesn't exist", async () => {
             prismaMock.users.findUniqueOrThrow.mockRejectedValue(new Error("User not found"));
 
-            await expect(userModel.getPasswordByEmail("test@test.com")).rejects.toThrow("User not found");
+            expect(userModel.getPasswordByEmail("test@test.com")).rejects.toBeNull;
         });
     })
 

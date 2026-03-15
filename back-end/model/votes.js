@@ -1,10 +1,12 @@
 import { prisma } from "../db/prisma.ts";
 
+
 export async function getAll() {
   const allVotes = await prisma.votes.findMany();
 
   return allVotes;
 }
+
 
 export async function createVote(
   entryId,
@@ -23,14 +25,17 @@ export async function createVote(
         theme_respect_rating: themeRespectRating,
       },
     });
+
     return { success: true, vote: vote };
   } catch (error) {
     return { success: false, message: "Something happened, please try later" };
   }
 }
 
+// Looks up a specific vote using both the entry ID and the user ID.
 export async function getVoteByEntryAndUser(entryId, userId) {
   try {
+    // If a vote exists, it returns the object. If not, it returns null.
     const vote = await prisma.votes.findFirst({
       where: {
         user_id: userId,
@@ -38,14 +43,17 @@ export async function getVoteByEntryAndUser(entryId, userId) {
       },
     });
 
+
     if (!vote) {
       return {
         success: false,
         message: "No vote",
       };
     }
+
+    // If a vote is found, return it
     return { success: true, vote: vote };
-  } catch (err) {
+  } catch (error) {
     return {
       success: false,
       message: "Something happened, please try later",

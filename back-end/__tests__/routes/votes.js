@@ -39,7 +39,7 @@ describe("Votes Routes", () => {
 
             expect(res.status).toBe(200);
             expect(res.body.success).toBe(true);
-            expect(res.body.users[0].id).toBe(1);
+            expect(res.body.votes[0].id).toBe(1);
         });
     });
 
@@ -59,7 +59,7 @@ describe("Votes Routes", () => {
                 });
 
             expect(res.status).toBe(200);
-            expect(res.body.message).toBe("Entry created successfully!");
+            expect(res.body.message).toBe("Votes created successfully!");
             expect(prismaMock.votes.create).toHaveBeenCalledTimes(1);
         });
     });

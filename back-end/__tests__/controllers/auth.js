@@ -156,6 +156,16 @@ describe("Auth Controllers & Middleware", () => {
             expect(next).toHaveBeenCalled();
         });
 
+        test("should catch error and return 401 if bearer token is invalid", async () => {
+            req.get.mockReturnValue("Bearer bad_token");
+            jwtMock.verify.mockImplementation(() => { throw new Error("JWT Malformed"); });
+
+            await auth(req, res, next);
+            expect(res.status).toHaveBeenCalledWith(401);
+            expect(res.json).toHaveBeenCalledWith({ message: "Invalid or expired token" });
+        });
+
+
         test("should authenticate via body email and password", async () => {
             req.body = { email: "test@test.com", password: "password123" };
             userModelMock.getPasswordByEmail.mockResolvedValue("hashed");

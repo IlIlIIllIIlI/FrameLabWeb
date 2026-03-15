@@ -1,10 +1,12 @@
 import { prisma } from "../db/prisma.ts";
 
+
 export async function getAll() {
   const allComments = await prisma.comments.findMany();
 
   return allComments;
 }
+
 
 export async function getCommentById(id) {
   const comment = await prisma.comments.findUnique({
@@ -16,8 +18,10 @@ export async function getCommentById(id) {
   return comment;
 }
 
+
 export async function deleteCommentById(id) {
   try {
+    // Await the deletion operation
     await prisma.comments.delete({
       where: {
         id: id,
@@ -25,10 +29,11 @@ export async function deleteCommentById(id) {
     });
 
     return true;
-  } catch (PrismaClientKnownRequestError) {
+  } catch (error) {
     return false;
   }
 }
+
 
 export async function createComment(entryId, userId, content) {
   try {
@@ -39,9 +44,10 @@ export async function createComment(entryId, userId, content) {
         content: content,
       },
     });
+
+    // Return a structured success object containing the newly created comment data
     return { success: true, comment: comment };
   } catch (error) {
-    console.log(error);
 
     return { success: false, message: "Something happened, please try later" };
   }

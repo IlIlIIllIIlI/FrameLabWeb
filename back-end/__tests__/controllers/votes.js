@@ -24,10 +24,10 @@ describe("Votes Controller", () => {
     });
 
     describe("getAllVotes()", () => {
-        test("should return a JSON list of all votes (users)", async () => {
+        test("should return a JSON list of all votes", async () => {
             voteModelMock.getAll.mockResolvedValue([{ id: 1 }]);
             await getAllVotes(req, res);
-            expect(res.json).toHaveBeenCalledWith({ success: true, users: [{ id: 1 }] });
+            expect(res.json).toHaveBeenCalledWith({ success: true, votes: [{ id: 1 }] });
         });
     });
 
@@ -95,7 +95,7 @@ describe("Votes Controller", () => {
             voteModelMock.createVote.mockResolvedValue({ success: true });
 
             await castVote(req, res);
-            expect(res.json).toHaveBeenCalledWith({ message: "Entry created successfully!" });
+            expect(res.json).toHaveBeenCalledWith({ message: "Votes created successfully!" });
         });
 
         test("should drop down to return the error object if creation fails", async () => {

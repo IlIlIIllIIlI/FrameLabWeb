@@ -54,7 +54,7 @@ describe("Comments Controller", () => {
             req.params.id = "99";
             commentModelMock.deleteCommentById.mockResolvedValue(false);
             await deleteCommentById(req, res);
-            expect(res.json).toHaveBeenCalledWith({ success: false, message: "Comment not found", error: 402 });
+            expect(res.json).toHaveBeenCalledWith({ success: false, message: "Comment not found" });
         });
     });
 

@@ -1,7 +1,9 @@
 import { prisma } from "../db/prisma.ts";
 
+
 export async function getAll() {
   const allUsers = await prisma.users.findMany({
+    // Not sending the password
     omit: {
       password: true,
     },
@@ -10,6 +12,7 @@ export async function getAll() {
   return allUsers;
 }
 
+// Exclusively used by the authentication controller to compare passwords against the stored hash.
 export async function getPasswordByEmail(email) {
   try {
     const data = await prisma.users.findUniqueOrThrow({
@@ -23,7 +26,7 @@ export async function getPasswordByEmail(email) {
 
     return data.password;
   } catch (error) {
-    throw error
+    return null;
   }
 }
 
@@ -39,10 +42,12 @@ export async function getUserByEmail(email) {
     });
 
     return data;
-  } catch (PrismaClientKnownRequestError) {
+  } catch (error) {
+
     return false;
   }
 }
+
 
 export async function createUser(email, firstName, lastName, password) {
   try {
@@ -55,13 +60,14 @@ export async function createUser(email, firstName, lastName, password) {
       },
     });
 
+
     return true;
   } catch (error) {
     return false;
   }
 }
 
-
+// For isAdmin Middleware
 export async function getIsAdminByEmail(email) {
   try {
     const data = await prisma.users.findUniqueOrThrow({
@@ -74,9 +80,8 @@ export async function getIsAdminByEmail(email) {
     });
 
     return data;
-
-
-  } catch (PrismaClientKnownRequestError) {
+  } catch (error) {
+    // If the user isn't found, default to not an admin
     return false;
   }
 }
