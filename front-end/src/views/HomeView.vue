@@ -19,8 +19,8 @@ challengesStore.getCurrent()
     </div>
     <div v-if="challengesStore.isLoading" class="flex justify-center items-center py-12">
       <div
-        class="w-10 h-10 border-4 border-brand-700 dark:border-brand-600 border-t-brand-accent rounded-full animate-spin"
-      />
+        class="w-10 h-10 border-4 border-brand-700 dark:border-brand-600 border-t-brand-accent dark:border-t-brand-accent rounded-full animate-spin"
+      ></div>
     </div>
     <div v-if="challengesStore.currentChallenge && !challengesStore.isLoading">
       <div class="flex items-center gap-3 mb-6">
