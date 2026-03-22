@@ -5,6 +5,7 @@ export const useAuthstore = defineStore('authStore', {
     user: null,
     error: '',
     isLoading: false,
+    isAppLoading: true
   }),
   actions: {
     async login(credentials) {
@@ -61,7 +62,7 @@ export const useAuthstore = defineStore('authStore', {
     },
     async checkUser() {
       this.error = ''
-      this.isLoading = true
+      this.isAppLoading = true;
 
       const response = await fetch('/api/auth/me')
 
@@ -71,7 +72,7 @@ export const useAuthstore = defineStore('authStore', {
       } else {
         this.user = null
       }
-      this.isLoading = false
+      this.isAppLoading = false;
     },
     async logout() {
       this.error = ''

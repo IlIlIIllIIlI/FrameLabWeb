@@ -35,8 +35,8 @@ challengesStore.getCurrent()
       <article class="max-w-3xl">
         <ChallengeDetails :challenge="challengesStore.currentChallenge" :is-featured="true" />
       </article>
-      <p class="text-red-500 mt-4 font-medium">{{ challengesStore.error }}</p>
     </div>
+    <p class="text-red-500 mt-4 font-medium">{{ challengesStore.error }}</p>
     <div v-if="challengesStore.archivedChallenges?.length > 0 && !challengesStore.isLoading">
       <h2 class="text-2xl font-bold text-brand-800 dark:text-slate-100 mb-6">Previous Challenge</h2>
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
