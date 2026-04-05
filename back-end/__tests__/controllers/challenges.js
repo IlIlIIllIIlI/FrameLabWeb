@@ -9,6 +9,16 @@ jest.unstable_mockModule("fs", () => ({
     },
 }));
 
+jest.unstable_mockModule("jsonwebtoken", () => ({
+    default: {
+        verify: jest.fn()
+    },
+}));
+
+jest.unstable_mockModule("../../utils/voteutils.js", () => ({
+    enrichEntriesWithVoteData: jest.fn()
+}));
+
 jest.unstable_mockModule("../../model/challenges.js", () => ({
     getArchived: jest.fn(),
     getCurrent: jest.fn(),
@@ -28,15 +38,17 @@ const {
     archiveChallenge
 } = await import("../../controller/challenges.js");
 
-describe("Challenges Controller (100% Coverage)", () => {
+describe("Challenges Controller", () => {
     let req, res;
 
     beforeEach(() => {
         jest.clearAllMocks();
+        process.env.PRIVATE_KEY = "test";
 
         req = {
             body: {},
             params: {},
+            cookies: {},
             file: { filename: "image.jpg", path: "/tmp/image.jpg" }
         };
 
@@ -91,6 +103,43 @@ describe("Challenges Controller (100% Coverage)", () => {
 
             expect(res.status).toHaveBeenCalledWith(404);
             expect(res.json).toHaveBeenCalledWith(mockData);
+        });
+
+        test("should enrich entries with vote data if challenge has entries and user is logged in", async () => {
+            req.params.id = "5";
+            req.cookies.session = "valid_token";
+
+            const mockChallengeData = {
+                success: true,
+                challenge: {
+                    id: 5,
+                    entries: [{ id: 10, image: "test.jpg" }]
+                }
+            };
+            challengeModelMock.getChallenge.mockResolvedValue(mockChallengeData);
+
+            const jwtMock = (await import("jsonwebtoken")).default;
+            jwtMock.verify.mockReturnValue({ user: { id: 99 } });
+
+            const enrichedEntries = [{ id: 10, image: "test.jpg", hasVoted: false }];
+            const voteUtilsMock = await import("../../utils/voteutils.js");
+            voteUtilsMock.enrichEntriesWithVoteData.mockResolvedValue(enrichedEntries);
+
+            await getChallengeById(req, res);
+
+            expect(jwtMock.verify).toHaveBeenCalledWith("valid_token", "test");
+            expect(voteUtilsMock.enrichEntriesWithVoteData).toHaveBeenCalledWith(
+                [{ id: 10, image: "test.jpg" }],
+                99
+            );
+
+            expect(res.json).toHaveBeenCalledWith({
+                success: true,
+                challenge: {
+                    id: 5,
+                    entries: enrichedEntries
+                }
+            });
         });
     });
 

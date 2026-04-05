@@ -1,12 +1,14 @@
 import * as challengeModel from "../model/challenges.js";
+import * as voteUtils from "../utils/voteutils.js"
 import fs from "fs";
+import jwt from "jsonwebtoken";
 
 // Fetches a list of all past challenges that have been marked as archived.
 export async function getArchivedChallenges(req, res) {
   const challenges = await challengeModel.getArchived();
   res.json(challenges);
-}
 
+}
 // Fetches the single active challenge
 export async function getCurrentChallenge(req, res) {
   const challenge = await challengeModel.getCurrent();
@@ -18,7 +20,21 @@ export async function getChallengeById(req, res) {
   // Parse the ID from the URL parameters
   const challenge = await challengeModel.getChallenge(parseInt(req.params.id));
 
+
   if (challenge.success) {
+
+    if (challenge.challenge.entries) {
+      const session = req.cookies?.session;
+      if (session) {
+
+        const data = jwt.verify(session, process.env.PRIVATE_KEY);
+
+        if (data.user.id) {
+
+          challenge.challenge.entries = await voteUtils.enrichEntriesWithVoteData(challenge.challenge.entries, data.user.id);
+        }
+      }
+    }
     return res.json(challenge);
   } else {
     res.status(404).json(challenge);

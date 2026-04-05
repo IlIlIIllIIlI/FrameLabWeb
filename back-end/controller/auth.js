@@ -19,6 +19,13 @@ export async function login(req, res) {
         // fetch the user's data
         const userData = await userModel.getUserByEmail(email);
 
+        if (userData.is_activated === false) {
+            return res.status(403).json({
+                success: false,
+                message: "Please activate your account before logging in."
+            });
+        }
+
         // Create a JSON Web Token containing the user's data
         const token = jwt.sign({ user: userData }, process.env.PRIVATE_KEY, {
             algorithm: "HS256",
@@ -97,14 +104,18 @@ export async function register(req, res) {
 
         const token = jwt.sign({ user: userData }, process.env.PRIVATE_KEY, {
             algorithm: "HS256",
-            expiresIn: "1 year",
+            expiresIn: "1h",
         });
 
         res.cookie("session", token, {
-            expires: new Date(Date.now() + 31556952000),
+            expires: new Date(Date.now() + 3600000), // Expires in 1 hour 
         });
 
-        res.json({ success: true, user: userData });
+        res.json({
+            success: true,
+            message: "Account created successfully!",
+            token: token
+        });
     } else {
         res.status(401).json({
             success: false,
@@ -208,4 +219,27 @@ export async function getUserByCookie(req, res) {
     } else {
         res.status(404).json({ message: "No cookie" });
     }
+}
+
+export async function verifyAccount(req, res) {
+    const token = req.query.token; // The frontend will send the token in the query
+
+    if (!token) {
+        return res.status(400).json({ success: false, message: "No token provided" });
+    }
+
+    try {
+        // Verify the token hasn't expired or been messed with
+        const decoded = jwt.verify(token, process.env.PRIVATE_KEY);
+
+        //Flip the boolean in the database
+        await userModel.activateUserAccount(decoded.user.id);
+
+        return res.json({ success: true, message: "Account successfully activated! You can now log in." });
+    } catch (error) {
+        // This catches expired tokens or fake tokens
+
+        return res.status(401).json({ success: false, message: "Invalid or expired activation link." });
+    }
+
 }

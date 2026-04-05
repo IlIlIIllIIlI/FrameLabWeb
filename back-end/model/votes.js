@@ -60,3 +60,135 @@ export async function getVoteByEntryAndUser(entryId, userId) {
     };
   }
 }
+
+// Gets all the user stats
+export async function getUserGlobalStats(userId) {
+  const stats = await prisma.votes.aggregate({
+    where: {
+      entries: {
+        user_id: userId
+      }
+    },
+    _avg: {
+      creativity_rating: true,
+      technical_rating: true,
+      theme_respect_rating: true
+    },
+    _count: {
+      id: true
+    }
+  });
+
+  if (!stats._avg.creativity_rating) {
+    stats._avg.creativity_rating = 0
+  }
+
+  if (!stats._avg.technical_rating) {
+    stats._avg.technical_rating = 0
+  }
+  if (!stats._avg.theme_respect_rating) {
+    stats._avg.theme_respect_rating = 0
+  }
+  const globalAvg = (stats._avg.creativity_rating + stats._avg.technical_rating + stats._avg.theme_respect_rating) / 3
+
+  return {
+    totalVotes: stats._count.id,
+    averages: {
+      creativity: stats._avg.creativity_rating,
+      technical: stats._avg.technical_rating,
+      theme: stats._avg.theme_respect_rating,
+      global: globalAvg
+    }
+  };
+}
+
+
+// Gets all the user stats
+export async function getEntryGlobalStats(entryId) {
+  const stats = await prisma.votes.aggregate({
+    where: {
+      entries: {
+        id: entryId
+      }
+    },
+    _avg: {
+      creativity_rating: true,
+      technical_rating: true,
+      theme_respect_rating: true
+    },
+    _count: {
+      id: true
+    }
+  });
+
+  if (!stats._avg.creativity_rating) {
+    stats._avg.creativity_rating = 0
+  }
+
+  if (!stats._avg.technical_rating) {
+    stats._avg.technical_rating = 0
+  }
+  if (!stats._avg.theme_respect_rating) {
+    stats._avg.theme_respect_rating = 0
+  }
+  const globalAvg = (stats._avg.creativity_rating + stats._avg.technical_rating + stats._avg.theme_respect_rating) / 3
+
+  return {
+    totalVotes: stats._count.id,
+    averages: {
+      creativity: stats._avg.creativity_rating,
+      technical: stats._avg.technical_rating,
+      theme: stats._avg.theme_respect_rating,
+      global: globalAvg
+    }
+  };
+}
+
+//Get user stats vote
+export async function getUserEntryStats(userId) {
+  const stats = await prisma.votes.groupBy({
+    by: ['entry_id'],
+    where: {
+      entries: { user_id: userId }
+    },
+    _avg: {
+      creativity_rating: true,
+      technical_rating: true,
+      theme_respect_rating: true
+    },
+    _count: {
+      _all: true
+    }
+  });
+
+  const formattedStats = [];
+
+  for (const stat of stats) {
+    if (!stat._avg.creativity_rating) {
+      stat._avg.creativity_rating = 0
+    }
+
+    if (!stat._avg.technical_rating) {
+      stat._avg.technical_rating = 0
+    }
+    if (!stat._avg.theme_respect_rating) {
+      stat._avg.theme_respect_rating = 0
+    }
+    const globalAvg = (stat._avg.creativity_rating + stat._avg.technical_rating + stat._avg.theme_respect_rating) / 3
+
+    formattedStats.push({
+      entry_id: stat.entry_id,
+      totalVotes: stat._count._all,
+      averages: {
+        creativity: stat._avg.creativity_rating,
+        technical: stat._avg.technical_rating,
+        theme: stat._avg.theme_respect_rating,
+        global: globalAvg
+      }
+    });
+
+
+  }
+
+  return formattedStats;
+}

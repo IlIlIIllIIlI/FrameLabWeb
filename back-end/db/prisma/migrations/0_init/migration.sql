@@ -32,8 +32,9 @@ CREATE TABLE `users` (
     `password` VARCHAR(255) NOT NULL,
     `last_name` VARCHAR(255) NOT NULL,
     `first_name` VARCHAR(255) NOT NULL,
-    `is_admin` BOOLEAN NULL,
+    `is_admin` BOOLEAN NOT NULL DEFAULT FALSE,
     `inscription_date` DATETIME(0) NOT NULL,
+    `is_archived` BOOLEAN NOT NULL DEFAULT FALSE,
 
     UNIQUE INDEX `email`(`email`),
     PRIMARY KEY (`id`)

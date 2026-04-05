@@ -12,6 +12,82 @@ export async function getAll() {
   return allUsers;
 }
 
+
+//Gets all the entries the user posted
+export async function getUserProfileData(userId) {
+  const allData = prisma.users.findUnique({
+    where: {
+      id: userId
+    },
+    omit: {
+      password: true
+    },
+    include: {
+      entries: {
+        include: {
+          challenges: true,
+          users: {
+            select: { first_name: true, last_name: true }
+          }
+        },
+        orderBy: {
+          submit_date: 'desc'
+        }
+      },
+      comments: {
+        include: {
+          entries: {
+            select: {
+              id: true,
+              edited_picture_url: true,
+              challenge_id: true
+            }
+          }
+        },
+        orderBy: {
+          date: 'desc'
+        }
+      },
+      votes: {
+        include: {
+          entries: {
+            select: {
+              id: true,
+              edited_picture_url: true,
+              challenge_id: true
+            }
+          }
+        },
+        orderBy: {
+          vote_date: 'desc'
+        }
+      }
+    }
+  });
+
+  return allData
+}
+
+
+//Get only the user info
+
+export async function getUserById(id) {
+  const user = await prisma.users.findUnique({
+    where: {
+      id: id
+    },
+    omit: {
+      password: true // Privacy
+    },
+  })
+
+  if (!user) {
+    return null
+  }
+
+  return user
+}
+
 // Exclusively used by the authentication controller to compare passwords against the stored hash.
 export async function getPasswordByEmail(email) {
   try {
@@ -84,4 +160,15 @@ export async function getIsAdminByEmail(email) {
     // If the user isn't found, default to not an admin
     return false;
   }
+}
+
+export async function activateUserAccount(userId) {
+  return await prisma.users.update({
+    where: {
+      id: userId
+    },
+    data: {
+      is_activated: true
+    },
+  });
 }

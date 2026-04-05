@@ -19,6 +19,7 @@ jest.unstable_mockModule("../../model/users.js", () => ({
     getUserByEmail: jest.fn(),
     createUser: jest.fn(),
     getIsAdminByEmail: jest.fn(),
+    activateUserAccount: jest.fn(),
 }));
 
 const bcryptMock = (await import("bcrypt")).default;
@@ -26,7 +27,7 @@ const jwtMock = (await import("jsonwebtoken")).default;
 const userModelMock = await import("../../model/users.js");
 const {
     login, register, auth, isAdmin,
-    logoutUser, checkPasswordByEmail, getUserByCookie
+    logoutUser, checkPasswordByEmail, getUserByCookie, verifyAccount
 } = await import("../../controller/auth.js");
 
 describe("Auth Controllers & Middleware", () => {
@@ -74,6 +75,20 @@ describe("Auth Controllers & Middleware", () => {
             await login(req, res);
             expect(res.cookie).toHaveBeenCalled();
             expect(res.json).toHaveBeenCalledWith(expect.objectContaining({ success: true, token: "token" }));
+        });
+        test("should return 403 if account is not activated", async () => {
+            req.body = { email: "test@test.com", password: "correct" };
+            userModelMock.getPasswordByEmail.mockResolvedValue("password");
+            bcryptMock.compare.mockResolvedValue(true);
+
+            userModelMock.getUserByEmail.mockResolvedValue({ id: 1, is_activated: false });
+
+            await login(req, res);
+
+            expect(res.status).toHaveBeenCalledWith(403);
+            expect(res.json).toHaveBeenCalledWith(expect.objectContaining({
+                message: "Please activate your account before logging in."
+            }));
         });
     });
 
@@ -253,6 +268,41 @@ describe("Auth Controllers & Middleware", () => {
             const result = await checkPasswordByEmail("test@test.com", "pass");
             expect(result).toBe(true);
             expect(bcryptMock.compare).toHaveBeenCalledWith("pass", "hashed");
+        });
+    });
+
+    describe("verifyAccount()", () => {
+        test("should return 400 if no token is provided", async () => {
+            req.query = {};
+
+            await verifyAccount(req, res);
+
+            expect(res.status).toHaveBeenCalledWith(400);
+            expect(res.json).toHaveBeenCalledWith({ success: false, message: "No token provided" });
+        });
+
+        test("should return 401 if token is invalid or expired", async () => {
+            req.query = { token: "bad_token" };
+            jwtMock.verify.mockImplementation(() => { throw new Error("Invalid token"); });
+
+            await verifyAccount(req, res);
+
+            expect(res.status).toHaveBeenCalledWith(401);
+            expect(res.json).toHaveBeenCalledWith({ success: false, message: "Invalid or expired activation link." });
+        });
+
+        test("should activate account and return 200 on success", async () => {
+            req.query = { token: "good_token" };
+            jwtMock.verify.mockReturnValue({ user: { id: 5 } });
+            userModelMock.activateUserAccount.mockResolvedValue(true);
+
+            await verifyAccount(req, res);
+
+            expect(userModelMock.activateUserAccount).toHaveBeenCalledWith(5);
+            expect(res.json).toHaveBeenCalledWith({
+                success: true,
+                message: "Account successfully activated! You can now log in."
+            });
         });
     });
 });

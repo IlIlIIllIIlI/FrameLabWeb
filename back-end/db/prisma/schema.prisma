@@ -46,6 +46,7 @@ model users {
   comments         comments[]
   entries          entries[]
   votes            votes[]
+  is_activated  Boolean  @default(false)
 }
 
 model votes {

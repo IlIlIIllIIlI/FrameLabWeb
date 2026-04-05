@@ -1,10 +1,8 @@
-# Documentation de la Base de Données 
+# Documentation de la Base de Données
 
-##  Valeurs (Colone, Type, Contrainte, Description) : 
+## Valeurs (Colone, Type, Contrainte, Description) :
 
-
-
-###     Users (Utilisateurs) : 
+### Users (Utilisateurs) :
 
 Cette table stocke les informations d'identification et de profil des membres.
 
@@ -22,10 +20,11 @@ Cette table stocke les informations d'identification et de profil des membres.
 
             inscription_date : DATETIME, Ne peut pas etre nulle, Date de création du compte.
 
-###     Challenges (Défis) : 
+            is_activated: BOOLEAN, par defaut est faux
+
+### Challenges (Défis) :
 
 Cette table définit les concours auxquels les utilisateurs peuvent participer.
-
 
             id : Entier, Clé Primaire, Identifiant unique du défi.
 
@@ -41,7 +40,7 @@ Cette table définit les concours auxquels les utilisateurs peuvent participer.
 
             is_archived : BOOLEAN, Aucune contrainte, Indicateur si le défi est terminé/archivé.
 
-###     entries (Participations) : 
+### entries (Participations) :
 
 Cette table lie un utilisateur à un défi.
 
@@ -57,7 +56,7 @@ Cette table lie un utilisateur à un défi.
 
             is_hidden : BOOLEAN, Aucune Contrainte, Permet de masquer.
 
-###     comments (Commentaires) : 
+### comments (Commentaires) :
 
 Cette table permet de stocker les commentaires sur une participation spécifique.
 
@@ -71,8 +70,7 @@ Cette table permet de stocker les commentaires sur une participation spécifique
 
             date : DATETIME, Ne peut pas etre nulle, Date de publication.
 
-
-###     votes : 
+### votes :
 
 Système de notation multicritères.
 
@@ -81,7 +79,7 @@ Système de notation multicritères.
             user_id: Entier, Clé Etrangère (vers users), L'utilisateur qui vote.
 
             entry_id : Entier, Clé Etrangère (vers entries), La participation notée.
-           
+
             creativity_rating : Float, Ne peut pas etre nulle,Note de créativité.
 
             technical_rating : Float, Ne peut pas etre nulle,Note technique..
@@ -90,21 +88,15 @@ Système de notation multicritères.
 
             vote_date : DATETIME, Ne peut pas etre nulle,Date du vote.
 
-###  Pour plus d'information sur les relations, vous pouvez lire le MCD/MLD
+### Pour plus d'information sur les relations, vous pouvez lire le MCD/MLD
 
+## Contraintes :
 
-
-
-
-
-##  Contraintes : 
-
-###     Clés Primaires et Etrangères : 
+### Clés Primaires et Etrangères :
 
 Toutes les tables possèdent une clé primaire (id) auto-incrémentée. Les relations sont assurées par des clés étrangères (REFERENCES) assurant que'on ne peut pas créer une participation pour un utilisateur ou un défi qui n'existe pas,qu'on puisse pas voter pour une participation inexistante et qu'il soit impossible de commenter une participation inexistante.
-            
 
-### Unicité 
+### Unicité
 
 Unicité de email dans users pour rendre impossible l'utilisation de deux comptes avec la même adresse email
 
@@ -113,4 +105,3 @@ Unicité du vote via UNIQUE(user_id, entry_id) dans votes pour empêcher qu'un u
 ### Not Null
 
 La majorité des champs sont marqués NOT NULL, ce qui force l'application à fournir des données complètes (pas de titre vide, pas de note vide, pas d'auteur manquant).
-

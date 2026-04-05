@@ -1,29 +1,6 @@
 @theme {
   --font-display: 'Inter', sans-serif;
   --breakpoint-3xl: 1920px;
-  /*
-  ALT PALETTE
-  --color-brand-900: oklch(0.2237 0.0979 267.23);
-  --color-brand-800: oklch(0.2895 0.0939 284.8);
-  --color-brand-700: oklch(0.3394 0.1428 268.13);
-  --color-brand-600: oklch(0.435 0.1079 282.97);
-  --color-brand-accent: oklch(0.7161 0.0982 18.97);
-
-  --color-atmos-bg: oklch(0.97 0.01 270);
-  --color-atmos-card: oklch(1 0 0);
-  --color-atmos-border: oklch(0.9352 0.0165 274.81);
-  */
-
-  --color-brand-900: oklch(0.3244 0.0229 264.18);
-  --color-brand-800: oklch(0.3792 0.029 266.47);
-  --color-brand-700: oklch(0.4157 0.0324 264.13);
-  --color-brand-600: oklch(0.4523 0.0352 264.13);
-  --color-brand-accent: oklch(0.7746 0.0622 217.47);
-  /* ALT ALT Accent : oklch(0.6921 0.0625 332.66)*/
-
-  --color-atmos-bg: oklch(0.9513 0.0074 260.73);
-  --color-atmos-card: oklch(0.933 0.0104 261.79);
-  --color-atmos-border: oklch(0.8993 0.0164 262.75);
 
   --ease-fluid: cubic-bezier(0.3, 0, 0, 1);
   --ease-snappy: cubic-bezier(0.2, 0, 0, 1);
@@ -38,29 +15,32 @@
 
   body {
     font-family: var(--font-display);
-    background-color: var(--color-atmos-bg);
-    color: var(--color-brand-900);
+    @apply bg-nord-6 text-nord-0;
     transition:
       background-color 500ms var(--ease-fluid),
       color 500ms var(--ease-fluid);
   }
 
   .dark body {
-    background-color: var(--color-brand-900);
+    @apply bg-nord-0 text-nord-4;
     background-attachment: fixed;
-    color: var(--color-atmos-bg);
   }
 
   ::selection {
-    background-color: var(--color-brand-accent);
-    color: var(--color-brand-900);
+    @apply bg-nord-5 text-nord-0;
+  }
+
+  .dark ::selection {
+    @apply bg-nord-2 text-nord-6;
   }
 
   a:focus-visible,
   button:focus-visible,
   input:focus-visible,
   textarea:focus-visible {
-    outline: 2px solid var(--color-brand-accent);
+    @apply outline-nord-8;
+    outline-width: 2px;
+    outline-style: solid;
     outline-offset: 4px;
     border-radius: 4px;
   }

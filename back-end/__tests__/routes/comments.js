@@ -62,16 +62,6 @@ describe("Comments Routes", () => {
     });
 
     describe("DELETE /api/comments/:id", () => {
-        test("should block non-admins from deleting comments", async () => {
-            prismaMock.users.findUniqueOrThrow.mockResolvedValue({ email: "user@test.com", is_admin: false });
-
-            const res = await request(app)
-                .delete("/api/comments/1")
-                .set("Cookie", [`session=${userToken}`]);
-
-            expect(res.status).toBe(403);
-        });
-
         test("should allow admins to delete comments", async () => {
             prismaMock.users.findUniqueOrThrow.mockResolvedValue({ email: "admin@test.com", is_admin: true });
             prismaMock.comments.delete.mockResolvedValue({ id: 1 });

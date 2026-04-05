@@ -12,7 +12,7 @@ export async function getCommentById(id) {
   const comment = await prisma.comments.findUnique({
     where: {
       id: id,
-    },
+    }
   });
 
   return comment;
@@ -21,7 +21,6 @@ export async function getCommentById(id) {
 
 export async function deleteCommentById(id) {
   try {
-    // Await the deletion operation
     await prisma.comments.delete({
       where: {
         id: id,
@@ -50,5 +49,25 @@ export async function createComment(entryId, userId, content) {
   } catch (error) {
 
     return { success: false, message: "Something happened, please try later" };
+  }
+}
+
+export async function editCommentById(commentId, content) {
+  try {
+    const comment = await prisma.comments.update({
+      where: {
+        id: commentId
+      },
+
+      data: {
+        content: content
+      }
+    })
+
+    return true;
+
+  } catch {
+    return false;
+
   }
 }

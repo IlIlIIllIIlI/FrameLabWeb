@@ -15,6 +15,7 @@ export async function getCommentById(req, res) {
 
 
 export async function deleteCommentById(req, res) {
+
   if (await commentModel.deleteCommentById(parseInt(req.params.id))) {
     // If the model returns true, the deletion was successful
     res.json({
@@ -60,4 +61,19 @@ export async function addComment(req, res) {
   }
 
   res.status(404).json(comment);
+}
+
+export async function editCommentById(req, res) {
+  if (await commentModel.editCommentById(parseInt(req.params.id), req.body.content)) {
+    // If the model returns true, the edit was successful
+    res.json({
+      success: true,
+      message: "Message edited successfully",
+    });
+  } else {
+    res.status(404).json({
+      success: false,
+      message: "Comment not found",
+    });
+  }
 }

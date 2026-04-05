@@ -33,6 +33,8 @@ export const useEntrystore = defineStore('entryStore', {
     async getEntryById(Id) {
       this.error = ''
       this.isLoading = true
+      this.selectedEntry = null
+
       const response = await fetch(`/api/entries/${Id}`)
       const data = await response.json()
       if (!response.ok) {

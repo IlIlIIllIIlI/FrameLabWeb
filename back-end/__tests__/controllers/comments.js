@@ -5,10 +5,11 @@ jest.unstable_mockModule("../../model/comments.js", () => ({
     getCommentById: jest.fn(),
     deleteCommentById: jest.fn(),
     createComment: jest.fn(),
+    editCommentById: jest.fn(),
 }));
 
 const commentModelMock = await import("../../model/comments.js");
-const { getAllComments, getCommentById, deleteCommentById, addComment } = await import("../../controller/comments.js");
+const { getAllComments, getCommentById, deleteCommentById, addComment, editCommentById } = await import("../../controller/comments.js");
 
 describe("Comments Controller", () => {
     let req, res;
@@ -93,6 +94,37 @@ describe("Comments Controller", () => {
             commentModelMock.createComment.mockResolvedValue(fail);
             await addComment(req, res);
             expect(res.json).toHaveBeenCalledWith(fail);
+        });
+    });
+    describe("editCommentById()", () => {
+        test("should return success true if edited successfully", async () => {
+            req.params.id = "1";
+            req.body = { content: "fzfzfz" };
+
+            commentModelMock.editCommentById.mockResolvedValue(true);
+
+            await editCommentById(req, res);
+
+            expect(commentModelMock.editCommentById).toHaveBeenCalledWith(1, "fzfzfz");
+            expect(res.json).toHaveBeenCalledWith({
+                success: true,
+                message: "Message edited successfully"
+            });
+        });
+
+        test("should return 404 and error if comment not found", async () => {
+            req.params.id = "99";
+            req.body = { content: "fzfzfz" };
+
+            commentModelMock.editCommentById.mockResolvedValue(false);
+
+            await editCommentById(req, res);
+
+            expect(res.status).toHaveBeenCalledWith(404);
+            expect(res.json).toHaveBeenCalledWith({
+                success: false,
+                message: "Comment not found"
+            });
         });
     });
 });

@@ -16,28 +16,31 @@ const authStore = useAuthstore()
 <template>
   <main class="w-full max-w-md mx-auto mt-10 sm:mt-20 px-4">
     <div class="text-center mb-8">
-      <h1 class="text-3xl font-black text-brand-900 dark:text-brand-accent tracking-tight mb-2">
+      <h1 class="text-3xl font-black text-nord-0 dark:text-nord-6 tracking-tight mb-2">
         Welcome Back
       </h1>
-      <p class="text-brand-600 dark:text-slate-400">Please log in to continue to FrameLab.</p>
+      <p class="text-nord-3 dark:text-nord-4">Please log in to continue to FrameLab.</p>
     </div>
+
     <div
       v-if="authStore.error"
-      class="mb-6 p-4 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800/50 flex items-start gap-3"
+      class="mb-6 p-4 rounded-lg bg-nord-11/10 border border-nord-11/30 flex items-start gap-3"
     >
-      <p class="text-sm font-medium text-red-700 dark:text-red-400">{{ authStore.error }}</p>
+      <p class="text-sm font-medium text-nord-11">{{ authStore.error }}</p>
     </div>
+
     <div
-      class="bg-atmos-card dark:bg-brand-800 p-6 sm:p-8 rounded-2xl shadow-sm border border-atmos-border dark:border-brand-700 transition-colors duration-500 ease-fluid"
+      class="bg-nord-5 dark:bg-nord-1 p-6 sm:p-8 rounded-2xl shadow-sm border border-nord-4 dark:border-nord-2 transition-colors duration-500 ease-fluid"
     >
       <LoginForm :is-loading="authStore.isLoading" @submit="submit" />
+
       <div
-        class="mt-6 text-center text-sm text-brand-600 dark:text-slate-400 border-t border-atmos-border dark:border-brand-700 pt-6"
+        class="mt-6 text-center text-sm text-nord-3 dark:text-nord-4 border-t border-nord-4 dark:border-nord-2 pt-6"
       >
-        <span>Don't have an account?</span>
+        <span>Don't have an account? </span>
         <RouterLink
           to="/register"
-          class="font-bold text-brand-accent hover:underline decoration-2 underline-offset-4 transition-all"
+          class="font-bold text-nord-8 hover:underline decoration-2 underline-offset-4 transition-all"
         >
           Sign up here
         </RouterLink>

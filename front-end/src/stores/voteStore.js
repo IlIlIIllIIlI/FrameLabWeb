@@ -18,9 +18,11 @@ export const useVotestore = defineStore('voteStore', {
       if (!response.ok) {
         const data = await response.json()
         this.error = data.message
+        return false
       }
 
       this.isLoading = false
+      return true
     },
   },
 })

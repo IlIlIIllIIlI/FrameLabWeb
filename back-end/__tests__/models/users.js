@@ -113,4 +113,62 @@ describe("Users Model", () => {
             expect(result).toBe(false);
         });
     });
+
+    describe("getUserProfileData()", () => {
+        test("should fetch full user profile data with nested includes", async () => {
+            const mockData = { id: 1, entries: [], comments: [], votes: [] };
+
+            prismaMock.users.findUnique.mockResolvedValue(mockData);
+
+            const result = await userModel.getUserProfileData(1);
+
+            expect(result).toEqual(mockData);
+            expect(prismaMock.users.findUnique).toHaveBeenCalledWith(
+                expect.objectContaining({
+                    where: { id: 1 },
+                    omit: { password: true }
+                })
+            );
+        });
+    });
+
+    describe("getUserById()", () => {
+        test("should return user without password if found", async () => {
+            const mockUser = { id: 1, email: "test@test.com" };
+            prismaMock.users.findUnique.mockResolvedValue(mockUser);
+
+            const result = await userModel.getUserById(1);
+
+            expect(result).toEqual(mockUser);
+            expect(prismaMock.users.findUnique).toHaveBeenCalledWith(
+                expect.objectContaining({
+                    where: { id: 1 },
+                    omit: { password: true }
+                })
+            );
+        });
+
+        test("should return null if user is not found", async () => {
+            prismaMock.users.findUnique.mockResolvedValue(null);
+
+            const result = await userModel.getUserById(99);
+
+            expect(result).toBeNull();
+        });
+    });
+
+    describe("activateUserAccount()", () => {
+        test("should update the is_activated flag to true", async () => {
+            const mockUpdate = { id: 1, is_activated: true };
+            prismaMock.users.update.mockResolvedValue(mockUpdate);
+
+            const result = await userModel.activateUserAccount(1);
+
+            expect(result).toEqual(mockUpdate);
+            expect(prismaMock.users.update).toHaveBeenCalledWith({
+                where: { id: 1 },
+                data: { is_activated: true }
+            });
+        });
+    });
 })

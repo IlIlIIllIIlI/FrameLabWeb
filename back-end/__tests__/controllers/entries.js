@@ -9,24 +9,41 @@ jest.unstable_mockModule("fs", () => ({
     }
 }));
 
+jest.unstable_mockModule("jsonwebtoken", () => ({
+    default: {
+        verify: jest.fn()
+    },
+}));
+
+jest.unstable_mockModule("../../utils/voteutils.js", () => ({
+    enrichEntriesWithVoteData: jest.fn()
+}));
+
 jest.unstable_mockModule("../../model/entries.js", () => ({
     createEntry: jest.fn(),
     getEntryByChallengeAndUser: jest.fn(),
     getEntryById: jest.fn(),
+    getAllEntries: jest.fn(),
+    getEntriesByChallenge: jest.fn()
 }));
 
 const fsMock = (await import("fs")).default;
+const jwtMock = (await import("jsonwebtoken")).default;
 const entriesModelMock = await import("../../model/entries.js");
-const { createEntry, getEntryById } = await import("../../controller/entries.js");
+const voteUtilsMock = await import("../../utils/voteutils.js");
+const { createEntry, getEntryById, getEntries } = await import("../../controller/entries.js");
 
 describe("Entries Controller", () => {
     let req, res;
 
     beforeEach(() => {
         jest.clearAllMocks();
+        process.env.PRIVATE_KEY = "test";
         req = {
             body: {},
             params: {},
+            cookies: {},
+            query: {},
             file: { filename: "entry.jpg", path: "/tmp/entry.jpg" }
         };
         res = { status: jest.fn().mockReturnThis(), json: jest.fn() };
@@ -110,5 +127,50 @@ describe("Entries Controller", () => {
             expect(res.status).toHaveBeenCalledWith(404);
             expect(res.json).toHaveBeenCalledWith({ success: false, message: "Entry does not exist" });
         });
+        test("should enrich entry if user is logged in (session cookie exists)", async () => {
+            req.params.id = "1";
+            req.cookies.session = "valid_token";
+
+            entriesModelMock.getEntryById.mockResolvedValue({ success: true, entry: { id: 1 } });
+            jwtMock.verify.mockReturnValue({ user: { id: 5 } });
+            voteUtilsMock.enrichEntriesWithVoteData.mockResolvedValue({ id: 1, enriched: true });
+
+            await getEntryById(req, res);
+
+            expect(jwtMock.verify).toHaveBeenCalledWith("valid_token", "test");
+            expect(voteUtilsMock.enrichEntriesWithVoteData).toHaveBeenCalledWith({ id: 1 }, 5);
+            expect(res.json).toHaveBeenCalledWith({ success: true, entry: { id: 1, enriched: true } });
+        });
     });
+    describe("getEntries()", () => {
+        test("should return all entries if no challenge query is provided", async () => {
+            entriesModelMock.getAllEntries.mockResolvedValue([{ id: 1 }, { id: 2 }]);
+
+            await getEntries(req, res);
+
+            expect(entriesModelMock.getAllEntries).toHaveBeenCalled();
+            expect(res.json).toHaveBeenCalledWith({ success: true, entries: [{ id: 1 }, { id: 2 }] });
+        });
+
+        test("should return specific challenge entries if challenge query is provided", async () => {
+            req.query.challenge = "2";
+            entriesModelMock.getEntriesByChallenge.mockResolvedValue([{ id: 3 }]);
+
+            await getEntries(req, res);
+
+            expect(entriesModelMock.getEntriesByChallenge).toHaveBeenCalledWith(2);
+            expect(res.json).toHaveBeenCalledWith({ success: true, entries: [{ id: 3 }] });
+        });
+
+        test("should return 404 if no entries are found", async () => {
+            entriesModelMock.getAllEntries.mockResolvedValue(null);
+
+            await getEntries(req, res);
+
+            expect(res.status).toHaveBeenCalledWith(404);
+            expect(res.json).toHaveBeenCalledWith({ success: false, message: "No entries" });
+        });
+    });
+
+
 });

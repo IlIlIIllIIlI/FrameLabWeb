@@ -1,6 +1,7 @@
 import { Router } from "express";
 import {
   getAllUsers,
+  getUser
 } from "./controller/users.js";
 import {
   login,
@@ -8,8 +9,8 @@ import {
   isAdmin,
   register,
   logoutUser,
-  getUserByCookie
-
+  getUserByCookie,
+  verifyAccount
 } from "./controller/auth.js";
 import {
   getArchivedChallenges,
@@ -23,11 +24,13 @@ import {
   getCommentById,
   deleteCommentById,
   addComment,
+  editCommentById,
 } from "./controller/comments.js";
 import { getAllVotes, castVote } from "./controller/votes.js";
 import {
   createEntry,
   getEntryById,
+  getEntries
 } from "./controller/entries.js";
 import { uploadImage } from "./config/mutler.js";
 
@@ -99,6 +102,19 @@ const router = Router();
  *                 message:
  *                   type: string
  *                   example: Incorrect Email or password
+ *       403:
+ *         description: Account not activated
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: Please activate your account before logging in.
  *       404:
  *         description: Missing email or password
  *         content:
@@ -167,19 +183,11 @@ router.post("/auth/login", login);
  *                 success:
  *                   type: boolean
  *                   example: true
- *                 user:
- *                   type: object
- *                   properties:
- *                     id:
- *                       type: integer
- *                     email:
- *                       type: string
- *                     firstName:
- *                       type: string
- *                     lastName:
- *                       type: string
- *                     is_admin:
- *                       type: boolean
+ *                 message:
+ *                   type: string
+ *                   example: Account created successfully!
+ *                 token:
+ *                   type: string
  *       401:
  *         description: Invalid input or account already exists
  *         content:
@@ -192,7 +200,7 @@ router.post("/auth/login", login);
  *                   example: false
  *                 message:
  *                   type: string
-                     example: Email already exist
+ *                   example: Email already exist
  */
 router.post("/auth/register", register);
 
@@ -340,6 +348,60 @@ router.route("/users").get(auth, getAllUsers);
 
 /**
  * @openapi
+ * /api/users/{id}:
+ *   get:
+ *     summary: Get user by ID
+ *     description: Retrieves a specific user by their ID. Add ?full query parameter to get detailed profile with entries and statistics. Requires authentication.
+ *     tags:
+ *       - Users
+ *     security:
+ *       - cookieAuth: []
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         description: The user ID
+ *         schema:
+ *           type: integer
+ *           example: 1
+ *       - in: query
+ *         name: full
+ *         required: false
+ *         description: Include full profile data with entries and statistics
+ *         schema:
+ *           type: boolean
+ *           example: true
+ *     responses:
+ *       200:
+ *         description: Successfully retrieved user
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 user:
+ *                   type: object
+ *       404:
+ *         description: User not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: User Not Found
+ */
+router.route("/users/:id").get(auth, getUser)
+/**
+ * @openapi
  * /api/challenges:
  *   get:
  *     summary: Get all archived challenges
@@ -429,7 +491,7 @@ router.route("/users").get(auth, getAllUsers);
  *                   type: string
  *                   example: Challenge created successfully!
  *       401:
- *         description: Unauthorized - Authentication required
+ *         description: Invalid title, description, start date, or end date
  *         content:
  *           application/json:
  *             schema:
@@ -437,9 +499,19 @@ router.route("/users").get(auth, getAllUsers);
  *               properties:
  *                 message:
  *                   type: string
- *                   example: You need to be logged in
+ *                   example: Invalid Title
  *       403:
- *         description: Forbidden - Admin privileges required or no current challenge exists
+ *         description:  Admin privileges required or there is already a challenge going on
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: You need to be an admin to go further
+ *       404:
+ *         description: There is already a challenge going on
  *         content:
  *           application/json:
  *             schema:
@@ -448,15 +520,6 @@ router.route("/users").get(auth, getAllUsers);
  *                 message:
  *                   type: string
  *                   example: There is already a challenge going on
- *       404:
- *         description: Bad request - Invalid input
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
  */
 router
   .route("/challenges")
@@ -465,69 +528,7 @@ router
 
 /**
  * @openapi
- * /api/challenges/{id}:
- *   get:
- *     summary: Get challenge by ID
- *     description: Retrieves a specific challenge by its ID
- *     tags:
- *       - Challenges
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         description: The challenge ID
- *         schema:
- *           type: integer
- *           example: 1
- *     responses:
- *       200:
- *         description: Successfully retrieved challenge
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: true
- *                 challenge:
- *                   type: object
- *                   properties:
- *                     id:
- *                       type: integer
- *                     title:
- *                       type: string
- *                     description:
- *                       type: string
- *                     start_date:
- *                       type: string
- *                       format: date
- *                     end_date:
- *                       type: string
- *                       format: date
- *                     is_archived:
- *                       type: boolean
- *                     image:
- *                       type: string
- *       404:
- *         description: Challenge not found
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: false
- *                 message:
- *                   type: string
- *                   example: Challenge not found
- */
-router.route("/challenges/:id").get(getChallengeById);
-
-/**
- * @openapi
- * /api/challenge/current:
+ * /api/challenges/current:
  *   get:
  *     summary: Get current active challenge
  *     description: Retrieves the currently active (non-archived) challenge. Requires authentication.
@@ -613,9 +614,9 @@ router.route("/challenges/:id").get(getChallengeById);
  *               properties:
  *                 message:
  *                   type: string
- *                   example: Challenge is already archived
+ *                   example: You need to be an admin to go further
  *       404:
- *         description: Challenge not found
+ *         description: Challenge not found or already archived
  *         content:
  *           application/json:
  *             schema:
@@ -626,9 +627,73 @@ router.route("/challenges/:id").get(getChallengeById);
  *                   example: Challenge does not exist
  */
 router
-  .route("/challenge/current")
+  .route("/challenges/current")
   .get(auth, getCurrentChallenge)
   .put(auth, isAdmin, archiveChallenge);
+
+
+/**
+ * @openapi
+ * /api/challenges/{id}:
+ *   get:
+ *     summary: Get challenge by ID
+ *     description: Retrieves a specific challenge by its ID
+ *     tags:
+ *       - Challenges
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         description: The challenge ID
+ *         schema:
+ *           type: integer
+ *           example: 1
+ *     responses:
+ *       200:
+ *         description: Successfully retrieved challenge
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 challenge:
+ *                   type: object
+ *                   properties:
+ *                     id:
+ *                       type: integer
+ *                     title:
+ *                       type: string
+ *                     description:
+ *                       type: string
+ *                     start_date:
+ *                       type: string
+ *                       format: date
+ *                     end_date:
+ *                       type: string
+ *                       format: date
+ *                     is_archived:
+ *                       type: boolean
+ *                     image:
+ *                       type: string
+ *       404:
+ *         description: Challenge not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: Challenge not found
+ */
+router.route("/challenges/:id").get(getChallengeById);
+
 
 /**
  * @openapi
@@ -674,7 +739,7 @@ router
  *                   type: string
  *                   example: Entry created successfully!
  *       401:
- *         description: Unauthorized - Authentication required or missing required fields
+ *         description: Missing userId or challengeId
  *         content:
  *           application/json:
  *             schema:
@@ -684,7 +749,7 @@ router
  *                   type: string
  *                   example: No User
  *       404:
- *         description: Duplicate entry - User already has an entry for this challenge
+ *         description: Duplicate entry or missing challengeId
  *         content:
  *           application/json:
  *             schema:
@@ -758,15 +823,59 @@ router.route("/entries/:id").get(getEntryById);
 
 /**
  * @openapi
- * /api/comments:
+ * /api/entries:
  *   get:
- *     summary: Get all comments
- *     description: Retrieves all comments in the system. Requires authentication.
+ *     summary: Get all entries or filter by challenge
+ *     description: Retrieves entries. Use ?challenge=id query parameter to filter by challenge ID. Requires authentication.
  *     tags:
- *       - Comments
+ *       - Entries
  *     security:
  *       - cookieAuth: []
  *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: challenge
+ *         required: false
+ *         description: Filter entries by challenge ID
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Successfully retrieved entries
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 entries:
+ *                   type: array
+ *       404:
+ *         description: No entries found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: No entries
+ */
+router.route("/entries").get(auth, getEntries);
+
+/**
+ * @openapi
+ * /api/comments:
+ *   get:
+ *     summary: Get all comments
+ *     description: Retrieves all comments in the system.
+ *     tags:
+ *       - Comments
  *     responses:
  *       200:
  *         description: Successfully retrieved all comments
@@ -774,26 +883,6 @@ router.route("/entries/:id").get(getEntryById);
  *           application/json:
  *             schema:
  *               type: array
- *               items:
- *                 type: object
- *                 properties:
- *                   id:
- *                     type: integer
- *                     example: 1
- *                   entryId:
- *                     type: integer
- *                     example: 1
- *                   userId:
- *                     type: integer
- *                     example: 5
- *                   content:
- *                     type: string
- *                     example: Great work!
- *                   created_at:
- *                     type: string
- *                     format: date-time
- *       401:
- *         description: Unauthorized - Authentication required
  *   post:
  *     summary: Add a new comment
  *     description: Creates a new comment on an entry. Requires authentication.
@@ -834,9 +923,9 @@ router.route("/entries/:id").get(getEntryById);
  *                   type: string
  *                   example: Comment created successfully!
  *       401:
- *         description: Unauthorized - Authentication required
+ *         description: You need to be logged in
  *       404:
- *         description: Bad request - Missing required fields (content, userId, or entryId)
+ *         description: Missing required fields (content, userId, or entryId)
  *         content:
  *           application/json:
  *             schema:
@@ -853,12 +942,9 @@ router.route("/comments").get(auth, getAllComments).post(auth, addComment);
  * /api/comments/{id}:
  *   get:
  *     summary: Get comment by ID
- *     description: Retrieves a specific comment by its ID. Requires authentication.
+ *     description: Retrieves a specific comment by its ID.
  *     tags:
  *       - Comments
- *     security:
- *       - cookieAuth: []
- *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -870,26 +956,6 @@ router.route("/comments").get(auth, getAllComments).post(auth, addComment);
  *     responses:
  *       200:
  *         description: Successfully retrieved comment
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 id:
- *                   type: integer
- *                 entryId:
- *                   type: integer
- *                 userId:
- *                   type: integer
- *                 content:
- *                   type: string
- *                 created_at:
- *                   type: string
- *                   format: date-time
- *       401:
- *         description: Unauthorized - Authentication required
- *       404:
- *         description: Comment not found
  *   delete:
  *     summary: Delete a comment
  *     description: Deletes a comment by ID. Requires admin authentication.
@@ -920,11 +986,7 @@ router.route("/comments").get(auth, getAllComments).post(auth, addComment);
  *                 message:
  *                   type: string
  *                   example: Message deleted successfully
- *       401:
- *         description: Unauthorized - Authentication required
- *       403:
- *         description: Forbidden - Admin privileges required
- *       402:
+ *       404:
  *         description: Comment not found
  *         content:
  *           application/json:
@@ -937,11 +999,67 @@ router.route("/comments").get(auth, getAllComments).post(auth, addComment);
  *                 message:
  *                   type: string
  *                   example: Comment not found
+ *   put:
+ *     summary: Edit comment by ID
+ *     description: Edit a specific comment by its ID. Requires authentication.
+ *     tags:
+ *       - Comments
+ *     security:
+ *       - cookieAuth: []
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         description: The comment ID
+ *         schema:
+ *           type: integer
+ *           example: 1
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - content
+ *             properties:
+ *               content:
+ *                 type: string
+ *                 example: Updated comment
+ *     responses:
+ *       200:
+ *         description: Successfully edited comment
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: Message edited successfully
+ *       404:
+ *         description: Comment not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: Comment not found 
  */
 router
   .route("/comments/:id")
   .get(auth, getCommentById)
-  .delete(auth, isAdmin, deleteCommentById);
+  .delete(auth, deleteCommentById)
+  .put(auth, editCommentById)
 
 /**
  * @openapi
@@ -965,7 +1083,7 @@ router
  *                 success:
  *                   type: boolean
  *                   example: true
- *                 users:
+ *                 votes:
  *                   type: array
  *                   items:
  *                     type: object
@@ -1048,11 +1166,9 @@ router
  *               properties:
  *                 message:
  *                   type: string
- *                   example: Entry created successfully!
- *       401:
- *         description: Unauthorized - Authentication required
+ *                   example: Votes created successfully!
  *       404:
- *         description: Bad request - Missing fields, duplicate vote, or invalid rating values
+ *         description: Missing userId, entryId, duplicate vote, or invalid rating values
  *         content:
  *           application/json:
  *             schema:
@@ -1064,4 +1180,65 @@ router
  */
 router.route("/votes").get(auth, getAllVotes).post(auth, castVote);
 
+/**
+ * @openapi
+ * /api/auth/verify:
+ *   post:
+ *     summary: Verify and activate user account
+ *     description: Activates a user account using a verification token sent via email
+ *     tags:
+ *       - Authentication
+ *     parameters:
+ *       - in: query
+ *         name: token
+ *         required: true
+ *         description: The account verification token
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Account successfully activated
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: Account successfully activated! You can now log in.
+ *       400:
+ *         description: No token provided
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: No token provided
+ *       401:
+ *         description: Invalid or expired token
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: Invalid or expired activation link.
+ */
+router.post("/auth/verify", verifyAccount);
+
 export default router;
+
+
+

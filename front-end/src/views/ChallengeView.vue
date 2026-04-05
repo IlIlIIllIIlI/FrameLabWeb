@@ -19,6 +19,7 @@ const challengeId = route.params.id
 onMounted(async () => {
   await challengesStore.getChallengeById(challengeId)
 })
+
 async function submit(entryData) {
   const entry = entryStore.createEntry({
     challengeId: challengeId,
@@ -30,36 +31,88 @@ async function submit(entryData) {
   }
 }
 
-function vote(voteData) {
-  const vote = voteStore.castVote({
+async function vote(voteData) {
+  const success = await voteStore.castVote({
     userId: authStore.user.id,
     entryId: voteData.entryId,
     creativityRating: voteData.creativityRating,
     technicalRating: voteData.technicalRating,
     themeRespectRating: voteData.themeRespectRating,
   })
+
+  if (success) {
+    await entryStore.getEntryById(voteData.entryId)
+
+    const index = challengesStore.selectedChallenge.entries.findIndex(
+      (e) => e.id === voteData.entryId,
+    )
+
+    if (index !== -1) {
+      challengesStore.selectedChallenge.entries[index] = entryStore.selectedEntry
+    }
+  }
 }
 </script>
 <template>
-  <main v-if="challengesStore.selectedChallenge">
-    <ChallengeDetails :challenge="challengesStore.selectedChallenge" />
+  <main v-if="challengesStore.selectedChallenge" class="space-y-12">
+    <ChallengeDetails :challenge="challengesStore.selectedChallenge" class="pointer-events-none" />
 
-    <section v-if="!challengesStore.selectedChallenge.is_archived">
-      <h2>Submit your Entry</h2>
+    <section v-if="!challengesStore.selectedChallenge.is_archived" class="max-w-2xl mx-auto">
+      <h2 class="text-2xl font-bold text-nord-0 dark:text-nord-6 mb-4 flex items-center gap-2">
+        Submit your Entry
+      </h2>
       <EntryForm :is-loading="challengesStore.isLoading" @submit="submit" />
-      <p>{{ entryStore.error }}</p>
+
+      <div
+        v-if="entryStore.error"
+        class="mt-4 p-3 rounded bg-nord-11/10 text-nord-11 text-sm font-medium border border-nord-11/30"
+      >
+        {{ entryStore.error }}
+      </div>
     </section>
 
     <section>
-      <h2>Submissions</h2>
-      <article v-for="entry in challengesStore.selectedChallenge.entries" :key="entry.id">
-        <EntryDetails :entry :is-loading="challengesStore.isLoading" @submit="vote" />
-        <p>{{ voteStore.error }}</p>
-      </article>
+      <div
+        class="flex justify-between items-end mb-6 border-b border-nord-4 dark:border-nord-2 pb-4"
+      >
+        <h2 class="text-3xl font-black text-nord-0 dark:text-nord-6">
+          Submissions
+          <span class="text-nord-3 dark:text-nord-4 font-medium text-lg"
+            >({{ challengesStore.selectedChallenge.entries?.length || 0 }})</span
+          >
+        </h2>
+      </div>
+
+      <div
+        v-if="voteStore.error"
+        class="mb-6 p-4 rounded-lg bg-nord-11/10 text-nord-11 font-bold border border-nord-11/30 text-center"
+      >
+        {{ voteStore.error }}
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
+        <article v-for="entry in challengesStore.selectedChallenge.entries" :key="entry.id">
+          <EntryDetails :entry="entry" :is-loading="challengesStore.isLoading" @submit="vote" />
+        </article>
+      </div>
     </section>
   </main>
-  <div v-else>
-    <p v-if="challengesStore.error.length === 0">Loading challenge....</p>
-    <p>{{ challengesStore.error }}</p>
+
+  <div v-else class="flex flex-col items-center justify-center py-20 text-center">
+    <div v-if="challengesStore.error.length === 0" class="flex flex-col items-center gap-4">
+      <div
+        class="w-10 h-10 border-4 border-nord-4 dark:border-nord-3 border-t-nord-8 rounded-full animate-spin"
+      ></div>
+      <p class="text-nord-3 dark:text-nord-4 font-medium animate-pulse">
+        Loading challenge details...
+      </p>
+    </div>
+
+    <p
+      v-else
+      class="text-nord-11 font-bold text-xl bg-nord-11/10 px-6 py-4 rounded-xl border border-nord-11/30"
+    >
+      {{ challengesStore.error }}
+    </p>
   </div>
 </template>

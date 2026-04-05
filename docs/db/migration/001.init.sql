@@ -14,8 +14,10 @@ CREATE TABLE users (
   password         VARCHAR(255) NOT NULL,
   last_name        VARCHAR(255) NOT NULL,
   first_name       VARCHAR(255) NOT NULL,
-  is_admin         BOOLEAN ,
-  inscription_date DATETIME NOT NULL DEFAULT NOW()
+  is_admin         BOOLEAN DEFAULT FALSE,
+  inscription_date DATETIME NOT NULL DEFAULT NOW(),
+  is_activated     BOOLEAN DEFAULT FALSE 
+
 );
 
 CREATE TABLE entries (

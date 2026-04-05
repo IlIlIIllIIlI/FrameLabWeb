@@ -17,13 +17,14 @@ export const useAuthstore = defineStore('authStore', {
         body: JSON.stringify(credentials),
       })
 
+      const data = await response.json()
+
       if (!response.ok) {
-        this.error = await response.json().message
+        this.error = data.message
         this.isLoading = false
         return
       }
 
-      const data = await response.json()
 
       if (data.success) {
         this.user = data.user
@@ -49,16 +50,37 @@ export const useAuthstore = defineStore('authStore', {
 
       const data = await response.json()
 
-      if (data.success) {
-        this.user = data.user
+      if (!response.ok || !data.success) {
+        this.error = data.message || 'Sorry something happened, please try later'
         this.isLoading = false
-        this.error = ''
+        return { success: false }
+      }
+
+      this.isLoading = false
+      this.error = ''
+
+      return { success: true, token: data.token }
+    },
+    async verifyAccount(token) {
+      this.error = ''
+      this.isLoading = true
+
+
+      const response = await fetch(`/api/auth/verify?token=${token}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+      })
+
+      const data = await response.json()
+      this.isLoading = false
+
+      if (data.success) {
         return true
       } else {
         this.error = data.message
-        this.isLoading = false
         return false
       }
+
     },
     async checkUser() {
       this.error = ''

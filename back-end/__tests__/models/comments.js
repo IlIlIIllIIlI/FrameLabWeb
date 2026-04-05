@@ -65,4 +65,27 @@ describe("Comments Model", () => {
             expect(result).toEqual({ success: false, message: "Something happened, please try later" });
         });
     });
+    describe("editCommentById()", () => {
+        test("should return true if comment edit succeeds", async () => {
+            const mockUpdatedData = { id: 1, content: "fzfzfxt" };
+            prismaMock.comments.update.mockResolvedValue(mockUpdatedData);
+
+            const result = await commentModel.editCommentById(1, "fzfzft");
+
+            expect(result).toBe(true);
+
+            expect(prismaMock.comments.update).toHaveBeenCalledWith({
+                where: { id: 1 },
+                data: { content: "fzfzft" }
+            });
+        });
+
+        test("should return false if comment edit fails", async () => {
+            prismaMock.comments.update.mockRejectedValue(new Error("AAAA"));
+
+            const result = await commentModel.editCommentById(99, "New text");
+
+            expect(result).toBe(false);
+        });
+    });
 });

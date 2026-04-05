@@ -75,3 +75,23 @@ export async function getEntryById(id) {
     return { success: false, message: "Entry does not exist" };
   }
 }
+
+export async function getAllEntries() {
+
+  const allEntries = await prisma.entries.findMany();
+
+  return allEntries;
+
+}
+
+export async function getEntriesByChallenge(challengeId) {
+  const entries = await prisma.entries.findMany({
+    where: {
+      challenge_id: challengeId
+    }
+  });
+
+
+  return entries;
+
+}

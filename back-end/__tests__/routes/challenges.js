@@ -94,9 +94,9 @@ describe("Challenges Routes", () => {
         });
     });
 
-    describe("GET /api/challenge/current", () => {
+    describe("GET /api/challenges/current", () => {
         test("should return 401 if user is not authenticated", async () => {
-            const res = await request(app).get("/api/challenge/current");
+            const res = await request(app).get("/api/challenges/current");
             expect(res.status).toBe(401);
         });
 
@@ -106,7 +106,7 @@ describe("Challenges Routes", () => {
             prismaMock.challenges.findFirstOrThrow.mockResolvedValue(mockCurrent);
 
             const res = await request(app)
-                .get("/api/challenge/current")
+                .get("/api/challenges/current")
                 .set("Cookie", [`session=${userToken}`]);
 
             expect(res.status).toBe(200);
@@ -115,7 +115,7 @@ describe("Challenges Routes", () => {
         });
     });
 
-    describe("PUT /api/challenge/current", () => {
+    describe("PUT /api/challenges/current", () => {
         test("should allow an admin to archive a challenge", async () => {
             prismaMock.users.findUniqueOrThrow.mockResolvedValue({ email: "admin@test.com", is_admin: true });
 
@@ -127,7 +127,7 @@ describe("Challenges Routes", () => {
             prismaMock.challenges.update.mockResolvedValue({ id: 1, is_archived: true });
 
             const res = await request(app)
-                .put("/api/challenge/current")
+                .put("/api/challenges/current")
                 .set("Cookie", [`session=${adminToken}`])
                 .send({ id: 1 });
 
@@ -148,7 +148,7 @@ describe("Challenges Routes", () => {
             });
 
             const res = await request(app)
-                .put("/api/challenge/current")
+                .put("/api/challenges/current")
                 .set("Cookie", [`session=${adminToken}`])
                 .send({ id: 1 });
 

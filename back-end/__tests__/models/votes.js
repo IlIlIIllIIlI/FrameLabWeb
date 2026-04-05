@@ -72,4 +72,98 @@ describe("Votes Model", () => {
             expect(result).toEqual({ success: false, message: "Something happened, please try later" });
         });
     });
+    describe("getUserGlobalStats()", () => {
+        test("should return calculated stats with existing averages", async () => {
+            prismaMock.votes.aggregate.mockResolvedValue({
+                _avg: { creativity_rating: 4, technical_rating: 3, theme_respect_rating: 5 },
+                _count: { id: 10 }
+            });
+
+            const result = await voteModel.getUserGlobalStats(1);
+
+            expect(prismaMock.votes.aggregate).toHaveBeenCalledWith(
+                expect.objectContaining({ where: { entries: { user_id: 1 } } })
+            );
+            expect(result).toEqual({
+                totalVotes: 10,
+                averages: { creativity: 4, technical: 3, theme: 5, global: 4 }
+            });
+        });
+
+        test("should handle null averages by defaulting to 0", async () => {
+            prismaMock.votes.aggregate.mockResolvedValue({
+                _avg: { creativity_rating: null, technical_rating: null, theme_respect_rating: null },
+                _count: { id: 0 }
+            });
+
+            const result = await voteModel.getUserGlobalStats(1);
+
+            expect(result.averages).toEqual({ creativity: 0, technical: 0, theme: 0, global: 0 });
+        });
+    });
+
+    describe("getEntryGlobalStats()", () => {
+        test("should return calculated stats with existing averages", async () => {
+            prismaMock.votes.aggregate.mockResolvedValue({
+                _avg: { creativity_rating: 5, technical_rating: 5, theme_respect_rating: 5 },
+                _count: { id: 3 }
+            });
+
+            const result = await voteModel.getEntryGlobalStats(2);
+
+            expect(prismaMock.votes.aggregate).toHaveBeenCalledWith(
+                expect.objectContaining({ where: { entries: { id: 2 } } })
+            );
+            expect(result).toEqual({
+                totalVotes: 3,
+                averages: { creativity: 5, technical: 5, theme: 5, global: 5 }
+            });
+        });
+
+        test("should handle null averages by defaulting to 0", async () => {
+            prismaMock.votes.aggregate.mockResolvedValue({
+                _avg: { creativity_rating: null, technical_rating: null, theme_respect_rating: null },
+                _count: { id: 0 }
+            });
+
+            const result = await voteModel.getEntryGlobalStats(2);
+
+            expect(result.averages).toEqual({ creativity: 0, technical: 0, theme: 0, global: 0 });
+        });
+    });
+
+    describe("getUserEntryStats()", () => {
+        test("should map and format groupBy results with existing averages", async () => {
+            const mockGroupBy = [{
+                entry_id: 10,
+                _avg: { creativity_rating: 3, technical_rating: 3, theme_respect_rating: 3 },
+                _count: { _all: 2 }
+            }];
+            prismaMock.votes.groupBy.mockResolvedValue(mockGroupBy);
+
+            const result = await voteModel.getUserEntryStats(1);
+
+            expect(prismaMock.votes.groupBy).toHaveBeenCalledWith(
+                expect.objectContaining({ by: ['entry_id'], where: { entries: { user_id: 1 } } })
+            );
+            expect(result).toEqual([{
+                entry_id: 10,
+                totalVotes: 2,
+                averages: { creativity: 3, technical: 3, theme: 3, global: 3 }
+            }]);
+        });
+
+        test("should handle null averages in groupBy results by defaulting to 0", async () => {
+            const mockGroupBy = [{
+                entry_id: 20,
+                _avg: { creativity_rating: null, technical_rating: null, theme_respect_rating: null },
+                _count: { _all: 0 }
+            }];
+            prismaMock.votes.groupBy.mockResolvedValue(mockGroupBy);
+
+            const result = await voteModel.getUserEntryStats(1);
+
+            expect(result[0].averages).toEqual({ creativity: 0, technical: 0, theme: 0, global: 0 });
+        });
+    });
 });

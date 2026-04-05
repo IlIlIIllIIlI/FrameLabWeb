@@ -76,4 +76,31 @@ describe("Entries Model", () => {
             expect(result).toEqual({ success: false, message: "Entry does not exist" });
         });
     });
+    describe("getAllEntries()", () => {
+        test("should return all entries", async () => {
+            const mockEntries = [{ id: 1 }, { id: 2 }];
+
+            prismaMock.entries.findMany.mockResolvedValue(mockEntries);
+
+            const result = await entriesModel.getAllEntries();
+
+            expect(result).toEqual(mockEntries);
+            expect(prismaMock.entries.findMany).toHaveBeenCalled();
+        });
+    });
+
+    describe("getEntriesByChallenge()", () => {
+        test("should return entries for a specific challenge", async () => {
+            const mockEntries = [{ id: 1, challenge_id: 5 }];
+
+            prismaMock.entries.findMany.mockResolvedValue(mockEntries);
+
+            const result = await entriesModel.getEntriesByChallenge(5);
+
+            expect(result).toEqual(mockEntries);
+            expect(prismaMock.entries.findMany).toHaveBeenCalledWith({
+                where: { challenge_id: 5 }
+            });
+        });
+    });
 });

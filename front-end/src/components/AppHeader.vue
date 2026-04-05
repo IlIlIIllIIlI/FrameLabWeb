@@ -49,7 +49,7 @@ function toggleTheme() {
 
 <template>
   <header
-    class="sticky top-0 z-50 w-full backdrop-blur-md bg-white/80 dark:bg-brand-900/80 border-b border-brand-700/20 dark:border-brand-600/30 transition-colors duration-500 ease-fluid"
+    class="sticky top-0 z-50 w-full backdrop-blur-md bg-nord-6/90 dark:bg-nord-0/90 border-b border-nord-4 dark:border-nord-1 transition-colors duration-500 ease-fluid"
   >
     <nav
       aria-label="Main Navigation"
@@ -58,7 +58,7 @@ function toggleTheme() {
       <div class="flex items-center">
         <RouterLink
           to="/"
-          class="text-2xl font-black tracking-widest text-brand-700 dark:text-brand-accent uppercase flex items-center gap-2 hover:opacity-80 hover:-translate-y-0.5 transition-all duration-500 ease-snappy"
+          class="text-2xl font-black tracking-widest text-nord-0 dark:text-nord-6 hover:text-nord-8 dark:hover:text-nord-8 uppercase flex items-center gap-2 hover:-translate-y-0.5 transition-all duration-500 ease-snappy"
           aria-label="FrameLab Home"
         >
           <span>FrameLab</span>
@@ -68,28 +68,35 @@ function toggleTheme() {
       <div class="flex items-center gap-4 sm:gap-6">
         <button
           @click="toggleTheme"
-          class="p-2 rounded-full text-brand-700 dark:text-brand-accent hover:bg-brand-700/10 dark:hover:bg-brand-600/30 hover:-translate-y-0.5 transition-all duration-500 ease-snappy"
+          class="p-2 rounded-full text-nord-3 dark:text-nord-4 hover:bg-nord-4/50 dark:hover:bg-nord-1 hover:-translate-y-0.5 transition-all duration-500 ease-snappy"
           title="Toggle Dark Mode"
         >
           {{ isDark ? 'DarkMode' : 'LightMode' }}
         </button>
 
         <template v-if="authStore.user">
-          <span class="hidden sm:block text-sm font-medium text-brand-800 dark:text-slate-200">
-            Hello,<strong class="text-brand-accent">{{ authStore.user.first_name }}</strong
-            >!</span
+          <RouterLink
+            :to="{ name: 'profile', params: { id: authStore.user.id } }"
+            class="hidden sm:block text-sm font-medium text-nord-1 dark:text-nord-5 hover:text-nord-0 dark:hover:text-nord-6 transition-colors group"
           >
+            Hello,
+            <strong
+              class="text-nord-8 group-hover:underline decoration-2 underline-offset-4 transition-all"
+            >
+              {{ authStore.user.first_name }} </strong
+            >!
+          </RouterLink>
 
           <RouterLink
-            v-if="authStore.user.role === 'ADMIN'"
+            v-if="authStore.user.is_admin"
             to="/admin"
-            class="text-sm font-semibold text-brand-600 dark:text-brand-accent hover:underline decoration-2 underline-offset-4 hover:-translate-y-0.5 transition-all duration-500 ease-snappy"
+            class="text-sm font-semibold text-nord-9 dark:text-nord-9 hover:underline decoration-2 underline-offset-4 hover:-translate-y-0.5 transition-all duration-500 ease-snappy"
           >
-            Admin Panel
+            Admin Dashboard
           </RouterLink>
           <button
             @click="logout"
-            class="px-4 py-2 text-sm font-bold rounded-lg border-2 border-brand-700 dark:border-brand-accent text-brand-700 dark:text-brand-accent hover:bg-brand-700 hover:text-white dark:hover:bg-brand-accent dark:hover:text-brand-900 hover:-translate-y-0.5 transition-all duration-500 ease-snappy"
+            class="px-4 py-2 text-sm font-bold rounded-lg border-2 border-nord-8 text-nord-8 hover:bg-nord-8 hover:text-nord-0 dark:hover:text-nord-0 hover:-translate-y-0.5 transition-all duration-500 ease-snappy"
           >
             Log out
           </button>
@@ -98,12 +105,12 @@ function toggleTheme() {
         <template v-else>
           <RouterLink
             to="/login"
-            class="text-sm font-semibold text-brand-700 dark:text-slate-200 hover:text-brand-accent dark:hover:text-brand-accent hover:-translate-y-0.5 transition-all duration-500 ease-snappy"
+            class="text-sm font-semibold text-nord-1 dark:text-nord-5 hover:text-nord-8 dark:hover:text-nord-8 hover:-translate-y-0.5 transition-all duration-500 ease-snappy"
             >Login</RouterLink
           >
           <RouterLink
             to="/register"
-            class="px-5 py-2 text-sm font-bold rounded-lg bg-brand-accent text-brand-900 shadow-[0_0_15px_rgba(218,138,139,0.4)] hover:shadow-[0_0_20px_rgba(218,138,139,0.7)] hover:-translate-y-0.5 transition-all duration-500 ease-snappy"
+            class="px-5 py-2 text-sm font-bold rounded-lg bg-nord-8 text-nord-0 shadow-[0_0_15px_rgba(136,192,208,0.4)] hover:shadow-[0_0_20px_rgba(136,192,208,0.7)] hover:-translate-y-0.5 transition-all duration-500 ease-snappy"
             >Register</RouterLink
           >
         </template>

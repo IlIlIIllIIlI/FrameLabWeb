@@ -21,7 +21,7 @@ export const useChallengestore = defineStore('challengeStore', {
     async getCurrent() {
       this.error = ''
       this.isLoading = true
-      const response = await fetch('/api/challenge/current')
+      const response = await fetch('/api/challenges/current')
       const data = await response.json()
       if (!response.ok) {
         if (response.status === 401) {

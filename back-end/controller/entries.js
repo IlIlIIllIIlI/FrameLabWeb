@@ -1,5 +1,7 @@
 import * as entriesModel from "../model/entries.js";
+import * as voteUtils from "../utils/voteutils.js"
 import fs from "fs";
+import jwt from "jsonwebtoken";
 
 // Handles the submission of a new image entry for a specific challenge.
 export async function createEntry(req, res) {
@@ -61,12 +63,47 @@ export async function createEntry(req, res) {
 
 // Fetches a specific entry
 export async function getEntryById(req, res) {
-  const entry = await entriesModel.getEntryById(parseInt(req.params.id));
+  const entryId = parseInt(req.params.id);
 
-  if (entry.success) {
-    // If the entry is found, return it as JSON
-    return res.json(entry);
-  } else {
-    res.status(404).json(entry);
+
+
+  const response = await entriesModel.getEntryById(entryId);
+
+  if (!response.success) {
+    return res.status(404).json(response);
   }
+
+  const session = req.cookies?.session;
+  if (session) {
+
+    const data = jwt.verify(session, process.env.PRIVATE_KEY);
+
+    if (data.user) {
+
+      const entry = await voteUtils.enrichEntriesWithVoteData(response.entry, data.user.id);
+
+      return res.json({ success: true, entry: entry });
+
+    }
+  }
+
+  return res.json({ success: true, entry: response.entry });
+}
+
+export async function getEntries(req, res) {
+  let entries;
+  if (req.query.challenge) {
+    entries = await entriesModel.getEntriesByChallenge(parseInt(req.query.challenge))
+  } else {
+    entries = await entriesModel.getAllEntries()
+  }
+
+  if (!entries) {
+    res.status(404).json({ success: false, message: "No entries" });
+
+  } else {
+    res.json({ success: true, entries });
+  }
+
+
 }
