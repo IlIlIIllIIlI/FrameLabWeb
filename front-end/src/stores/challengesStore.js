@@ -69,7 +69,7 @@ export const useChallengestore = defineStore('challengeStore', {
     async archive(challengeId) {
       this.error = ''
       this.isLoading = true
-      const response = await fetch('/api/challenge/current', {
+      const response = await fetch('/api/challenges/current', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
