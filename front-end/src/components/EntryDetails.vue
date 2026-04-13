@@ -1,6 +1,9 @@
 <script setup lang="js">
+import { useAuthstore } from '@/stores/authStore'
 import { ref } from 'vue'
 import { RouterLink } from 'vue-router'
+
+const authStore = useAuthstore()
 
 const props = defineProps({
   entry: { type: Object, required: true },
@@ -64,7 +67,10 @@ function formSubmitted() {
       </div>
 
       <form
-        v-if="!entry.has_voted && !entry.challenges?.is_archived"
+        v-if="
+          (!entry.has_voted && !entry.challenges?.is_archived) ||
+          !(entry.user_id == authStore.user.id)
+        "
         @submit.prevent="formSubmitted"
         class="flex flex-col gap-4 mb-4 grow"
       >
