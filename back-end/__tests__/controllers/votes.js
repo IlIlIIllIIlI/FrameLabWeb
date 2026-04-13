@@ -107,5 +107,13 @@ describe("Votes Controller", () => {
             await castVote(req, res);
             expect(res.json).toHaveBeenCalledWith(fail);
         });
+
+        test("should return 404 if user has already voted for this entry", async () => {
+            req.body.userId = 1;
+            req.body.entryId = { userId: 1 };
+            await castVote(req, res);
+            expect(res.status).toHaveBeenCalledWith(404);
+            expect(res.json).toHaveBeenCalledWith({ message: "You can't Vote for yourself" });
+        });
     });
 });

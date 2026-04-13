@@ -34,6 +34,14 @@ export async function castVote(req, res) {
       .json({ message: "You already have a Vote for this entry" });
   }
 
+  //Check if the user is voting for themself 
+
+  if (entryId.userId == userId) {
+    return res
+      .status(404)
+      .json({ message: "You can't Vote for yourself" });
+  }
+
   // Ensure all ratings fall strictly within the 0 to 5 range.
   if (!themeRespectRating || themeRespectRating < 0 || themeRespectRating > 5) {
     return res
