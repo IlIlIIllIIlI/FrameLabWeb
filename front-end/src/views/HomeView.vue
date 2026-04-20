@@ -37,9 +37,16 @@ challengesStore.getCurrent()
       </article>
     </div>
 
-    <p v-if="challengesStore.error" class="text-nord-11 mt-4 font-medium">
-      {{ challengesStore.error }}
-    </p>
+    <div v-if="challengesStore.error" class="text-nord-11 mt-4 font-medium">
+      <RouterLink
+        to="/login"
+        v-if="challengesStore.error.includes('logged in')"
+        class="hover:underline decoration-2 underline-offset-4"
+      >
+        {{ challengesStore.error + '. Click here to log in' }}
+      </RouterLink>
+      <p v-else>{{ challengesStore.error }}</p>
+    </div>
 
     <div v-if="challengesStore.archivedChallenges?.length > 0 && !challengesStore.isLoading">
       <h2 class="text-2xl font-bold text-nord-0 dark:text-nord-6 mb-6">Previous Challenges</h2>

@@ -8,6 +8,7 @@ import { useChallengestore } from '@/stores/challengesStore'
 import { useEntrystore } from '@/stores/entryStore'
 import { onMounted } from 'vue'
 import { useRoute } from 'vue-router'
+import router from '@/router'
 
 const authStore = useAuthstore()
 const challengesStore = useChallengestore()
@@ -18,6 +19,10 @@ const challengeId = route.params.id
 
 onMounted(async () => {
   await challengesStore.getChallengeById(challengeId)
+
+  if (!challengesStore.selectedChallenge.is_archived && !authStore.user) {
+    router.push('/login')
+  }
 })
 
 async function submit(entryData) {
@@ -54,7 +59,20 @@ async function vote(voteData) {
 }
 </script>
 <template>
+  <RouterLink
+    :to="{ name: 'home' }"
+    class="inline-flex items-center gap-2 text-sm font-bold text-nord-8 hover:underline underline-offset-4 transition-all mb-6"
+  >
+    <span aria-hidden="true">←</span> Back to Home
+  </RouterLink>
   <main v-if="challengesStore.selectedChallenge" class="space-y-12">
+    <div class="border-b border-nord-4 dark:border-nord-2 pb-6">
+      <h1 class="text-4xl font-black text-nord-0 dark:text-nord-6 tracking-tight">Challenge</h1>
+      <p class="text-nord-3 dark:text-nord-4 mt-2 text-lg">
+        Participate in the current event or view others entries.
+      </p>
+    </div>
+
     <ChallengeDetails :challenge="challengesStore.selectedChallenge" class="pointer-events-none" />
 
     <section v-if="!challengesStore.selectedChallenge.is_archived" class="max-w-2xl mx-auto">

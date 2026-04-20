@@ -58,7 +58,7 @@ function toggleTheme() {
       <div class="flex items-center">
         <RouterLink
           to="/"
-          class="text-2xl font-black tracking-widest text-nord-0 dark:text-nord-6 hover:text-nord-8 dark:hover:text-nord-8 uppercase flex items-center gap-2 hover:-translate-y-0.5 transition-all duration-500 ease-snappy"
+          class="text-xl sm:text-2xl font-black tracking-widest text-nord-0 dark:text-nord-6 hover:text-nord-8 dark:hover:text-nord-8 uppercase flex items-center gap-2 hover:-translate-y-0.5 transition-all duration-500 ease-snappy"
           aria-label="FrameLab Home"
         >
           <span>FrameLab</span>
@@ -68,10 +68,11 @@ function toggleTheme() {
       <div class="flex items-center gap-4 sm:gap-6">
         <button
           @click="toggleTheme"
-          class="p-2 rounded-full text-nord-3 dark:text-nord-4 hover:bg-nord-4/50 dark:hover:bg-nord-1 hover:-translate-y-0.5 transition-all duration-500 ease-snappy"
+          class="text-sm p-2 rounded-full text-nord-3 dark:text-nord-4 hover:bg-nord-4/50 dark:hover:bg-nord-1 hover:-translate-y-0.5 transition-all duration-500 ease-snappy"
           title="Toggle Dark Mode"
         >
-          {{ isDark ? 'DarkMode' : 'LightMode' }}
+          <span v-if="isDark" class="material-icons"> dark_mode </span>
+          <span v-else class="material-icons"> light_mode </span>
         </button>
 
         <template v-if="authStore.user">

@@ -8,6 +8,7 @@ import { useVotestore } from '@/stores/voteStore'
 import { useRoute } from 'vue-router'
 import { onMounted } from 'vue'
 import CommentDetails from '@/components/CommentDetails.vue'
+import router from '@/router'
 
 const authStore = useAuthstore()
 const route = useRoute()
@@ -18,6 +19,10 @@ const entryId = route.params.id
 
 onMounted(async () => {
   await entryStore.getEntryById(route.params.id)
+
+  if (!authStore.user) {
+    router.push('/login')
+  }
 })
 
 async function vote(voteData) {
@@ -72,6 +77,13 @@ async function deleteComment(commentId) {
       >
         <span aria-hidden="true">←</span> Back to Gallery
       </RouterLink>
+
+      <div class="border-b border-nord-4 dark:border-nord-2 pb-6">
+        <h1 class="text-4xl font-black text-nord-0 dark:text-nord-6 tracking-tight">Entry</h1>
+        <p class="text-nord-3 dark:text-nord-4 mt-2 text-lg">
+          Vote and comment on this participation or view other comments.
+        </p>
+      </div>
 
       <EntryDetails :hide-comment-link="true" :entry="entryStore.selectedEntry" @submit="vote" />
     </section>
