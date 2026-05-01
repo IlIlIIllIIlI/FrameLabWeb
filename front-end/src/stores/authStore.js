@@ -43,14 +43,22 @@ export const useAuthstore = defineStore('authStore', {
       })
 
       if (!response.ok) {
-        this.error = 'Sorry something happened, please try later'
-        this.isLoading = false
-        return
+        try {
+          const data = await response.json()
+          this.error = data.message || 'Sorry something happened, please try later'
+          this.isLoading = false
+          return { success: false }
+
+        } catch {
+          this.error = 'Sorry something happened, please try later'
+          this.isLoading = false
+          return
+        }
       }
 
       const data = await response.json()
 
-      if (!response.ok || !data.success) {
+      if (!data.success) {
         this.error = data.message || 'Sorry something happened, please try later'
         this.isLoading = false
         return { success: false }
