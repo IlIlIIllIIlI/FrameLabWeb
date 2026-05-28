@@ -105,6 +105,7 @@ export async function getChallenge(id) {
               // Only pull the first and last name of the user for security/privacy
               select: { first_name: true, last_name: true },
             },
+            challenges: { select: { is_archived: true } }
           },
         },
       },

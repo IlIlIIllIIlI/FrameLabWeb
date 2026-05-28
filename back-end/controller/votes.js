@@ -1,5 +1,5 @@
 import * as voteModel from "../model/votes.js";
-
+import * as entryModel from "../model/entries.js"
 // Fetches all votes
 export async function getAllVotes(req, res) {
   const votes = await voteModel.getAll();
@@ -14,13 +14,30 @@ export async function castVote(req, res) {
   const creativityRating = req.body.creativityRating;
   const themeRespectRating = req.body.themeRespectRating;
 
-  // Ensure the  IDs exist
+  // Ensure the IDs exist
   if (!userId) {
     return res.status(404).json({ message: "no user" });
   }
   if (!entryId) {
     return res.status(404).json({ message: "no entry" });
   }
+
+
+  const targetEntry = await entryModel.getEntryById(parseInt(entryId));
+
+
+  if (!targetEntry.success) {
+    return res.status(404).json({ message: "Entry does not exist" });
+  }
+
+  //Check if the user is voting for themself 
+
+  if (targetEntry.entry.user_id === parseInt(userId)) {
+    return res
+      .status(403)
+      .json({ message: "You can't Vote for yourself" });
+  }
+
 
   // check if this user has already voted this entry
   const userVote = await voteModel.getVoteByEntryAndUser(
@@ -32,14 +49,6 @@ export async function castVote(req, res) {
     return res
       .status(404)
       .json({ message: "You already have a Vote for this entry" });
-  }
-
-  //Check if the user is voting for themself 
-
-  if (entryId.userId == userId) {
-    return res
-      .status(404)
-      .json({ message: "You can't Vote for yourself" });
   }
 
   // Ensure all ratings fall strictly within the 0 to 5 range.

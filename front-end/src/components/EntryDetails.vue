@@ -68,8 +68,7 @@ function formSubmitted() {
 
       <form
         v-if="
-          (!entry.has_voted && !entry.challenges?.is_archived) ||
-          !(entry.user_id == authStore.user.id)
+          !entry.has_voted && !entry.challenges?.is_archived && entry.user_id !== authStore.user?.id
         "
         @submit.prevent="formSubmitted"
         class="flex flex-col gap-4 mb-4 grow"

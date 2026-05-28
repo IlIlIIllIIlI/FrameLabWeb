@@ -22,8 +22,10 @@ export async function enrichEntriesWithVoteData(entries, currentUserId) {
         // Check if challenge is archived
         const isArchived = entry.challenges?.is_archived === true;
 
+        const isAuthor = entry.user_id === currentUserId;
+
         // Attach the stats
-        if (hasVoted || isArchived) {
+        if (hasVoted || isArchived || isAuthor) {
             entry.stats = await voteModel.getEntryGlobalStats(entry.id);
             entry.has_voted = hasVoted;
             entry.user_vote = userVote || null;

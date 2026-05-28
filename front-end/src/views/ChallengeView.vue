@@ -75,19 +75,10 @@ async function vote(voteData) {
 
     <ChallengeDetails :challenge="challengesStore.selectedChallenge" class="pointer-events-none" />
 
-    <section v-if="!challengesStore.selectedChallenge.is_archived" class="max-w-2xl mx-auto">
-      <h2 class="text-2xl font-bold text-nord-0 dark:text-nord-6 mb-4 flex items-center gap-2">
-        Submit your Entry
-      </h2>
-      <EntryForm :is-loading="challengesStore.isLoading" @submit="submit" />
-
-      <div
-        v-if="entryStore.error"
-        class="mt-4 p-3 rounded bg-nord-11/10 text-nord-11 text-sm font-medium border border-nord-11/30"
-      >
-        {{ entryStore.error }}
-      </div>
-    </section>
+    <section
+      v-if="!challengesStore.selectedChallenge.is_archived"
+      class="max-w-2xl mx-auto"
+    ></section>
 
     <section>
       <div

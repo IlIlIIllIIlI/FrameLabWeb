@@ -143,26 +143,6 @@ async function handleVoteSubmit(votePayload) {
         class="flex flex-col h-full"
       >
         <EntryDetails :entry="entry" @submit="handleVoteSubmit" />
-
-        <div
-          v-if="entry.challenges?.is_archived && !entry.has_voted"
-          class="mt-2 bg-nord-8 text-nord-0 p-3 rounded-lg text-center shadow-sm"
-        >
-          <p class="text-xs font-bold uppercase tracking-wider mb-1">
-            Score ({{ entry.stats?.totalVotes || 0 }} votes)
-          </p>
-          <p class="text-xl font-black">
-            {{ Number(entry.stats?.averages?.global || 0).toFixed(1) }}
-          </p>
-        </div>
-
-        <div
-          v-else-if="!entry.challenges?.is_archived && !entry.has_voted"
-          class="mt-2 bg-nord-5 dark:bg-nord-1 text-nord-3 dark:text-nord-4 p-3 rounded-lg text-center border border-dashed border-nord-4 dark:border-nord-2"
-        >
-          <p class="text-xs font-bold uppercase tracking-wider">Scores Hidden</p>
-          <p class="text-[10px] mt-1">Vote to reveal the community score!</p>
-        </div>
       </div>
 
       <div
