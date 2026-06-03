@@ -75,10 +75,28 @@ async function vote(voteData) {
 
     <ChallengeDetails :challenge="challengesStore.selectedChallenge" class="pointer-events-none" />
 
-    <section
-      v-if="!challengesStore.selectedChallenge.is_archived"
-      class="max-w-2xl mx-auto"
-    ></section>
+    <section v-if="!challengesStore.selectedChallenge.is_archived" class="max-w-2xl mx-auto mb-10">
+      <div
+        class="bg-nord-5 dark:bg-nord-1 p-8 rounded-2xl border border-nord-4 dark:border-nord-2 shadow-sm text-center flex flex-col items-center gap-6 transition-colors duration-500 ease-fluid"
+      >
+        <div>
+          <p class="text-nord-3 dark:text-nord-4 text-lg leading-relaxed">
+            To participate, you need to edit the picture using our dedicated desktop software:
+            <span class="font-bold text-nord-8">FrameSprite</span>.
+          </p>
+        </div>
+
+        <a
+          target="_blank"
+          rel="noopener noreferrer"
+          href="https://github.com/IlIlIIllIIlI/FrameLabDesktop/releases"
+          download
+          class="inline-flex items-center gap-2 px-8 py-3.5 bg-nord-8 text-nord-0 font-bold rounded-xl hover:bg-nord-7 hover:-translate-y-1 transition-all duration-300 shadow-md"
+        >
+          Download FrameSprite
+        </a>
+      </div>
+    </section>
 
     <section>
       <div
