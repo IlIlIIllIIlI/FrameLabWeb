@@ -5,6 +5,16 @@ import { RouterLink } from 'vue-router'
 
 const authStore = useAuthstore()
 
+const isImageModalOpen = ref(false)
+
+function openModal() {
+  isImageModalOpen.value = true
+}
+
+function closeModal() {
+  isImageModalOpen.value = false
+}
+
 const props = defineProps({
   entry: { type: Object, required: true },
   hideCommentLink: { type: Boolean, default: false },
@@ -41,7 +51,10 @@ function formSubmitted() {
   <div
     class="bg-nord-5 dark:bg-nord-1 border border-nord-4 dark:border-nord-2 rounded-2xl overflow-hidden shadow-sm flex flex-col h-full transition-colors duration-500 ease-fluid"
   >
-    <div class="w-full aspect-square bg-nord-4 dark:bg-nord-0 relative overflow-hidden group">
+    <div
+      class="w-full aspect-square bg-nord-4 dark:bg-nord-0 relative overflow-hidden group cursor-pointer"
+      @click="openModal"
+    >
       <img
         class="w-full h-full object-cover transition-transform duration-700 ease-fluid group-hover:scale-105"
         :src="`/public/${entry.edited_picture_url}`"
@@ -199,8 +212,41 @@ function formSubmitted() {
         >
           View Comments
         </RouterLink>
+
+        <button
+          type="button"
+          @click.prevent="openModal"
+          class="grow text-center py-2 border-2 border-nord-8 text-nord-8 font-bold rounded-lg hover:bg-nord-8 hover:text-nord-0 transition-all ease-snappy"
+        >
+          Full Image
+        </button>
+
         <slot name="actions"></slot>
       </div>
     </div>
   </div>
+
+  <Teleport to="body">
+    <div
+      v-if="isImageModalOpen"
+      class="fixed inset-0 z-[9999] flex items-center justify-center bg-nord-0/95 p-4 backdrop-blur-sm transition-opacity"
+      @click.self="closeModal"
+    >
+      <div class="relative max-w-full max-h-full flex flex-col items-end">
+        <button
+          type="button"
+          @click="closeModal"
+          class="mb-4 text-nord-4 hover:text-nord-6 font-bold text-lg tracking-widest uppercase transition-colors"
+        >
+          Close ✕
+        </button>
+
+        <img
+          :src="`/public/${entry.edited_picture_url}`"
+          alt="Full screen submission"
+          class="max-w-full max-h-[85vh] object-contain rounded-xl shadow-2xl border border-nord-3"
+        />
+      </div>
+    </div>
+  </Teleport>
 </template>
